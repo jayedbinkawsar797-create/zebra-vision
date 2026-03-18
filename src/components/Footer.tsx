@@ -1,4 +1,5 @@
 import { Phone, Mail, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 import zebraLogo from "@/assets/zebra-logo.png";
 
 const Footer = () => (
@@ -15,16 +16,15 @@ const Footer = () => (
           <h4 className="font-display font-bold text-foreground mb-4 text-xs uppercase tracking-widest">Quick Links</h4>
           <div className="space-y-2">
             {[
-              { label: "Home", href: "#hero" },
-              { label: "Models", href: "#models" },
-              { label: "Configure", href: "#configurator" },
-              { label: "Features", href: "#features" },
-              { label: "Financing", href: "#financing" },
-              { label: "Test Drive", href: "#testdrive" },
+              { label: "Home", href: "/" },
+              { label: "Customize Your Cart", href: "/customize" },
+              { label: "Book a Demo", href: "/book-demo" },
+              { label: "Dealer Application", href: "/dealer" },
+              { label: "Contact Us", href: "/contact" },
             ].map((l) => (
-              <a key={l.label} href={l.href} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link key={l.label} to={l.href} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {l.label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -42,7 +42,7 @@ const Footer = () => (
         <div>
           <h4 className="font-display font-bold text-foreground mb-4 text-xs uppercase tracking-widest">Locations</h4>
           <div className="space-y-3">
-            {["Florida Showroom", "Arizona Showroom", "Atlanta Showroom"].map((loc) => (
+            {["Florida Showroom", "Arizona Showroom"].map((loc) => (
               <div key={loc} className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0" /> {loc}
               </div>

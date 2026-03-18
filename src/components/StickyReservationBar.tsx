@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const StickyReservationBar = () => (
   <motion.div
@@ -16,12 +17,12 @@ const StickyReservationBar = () => (
         </span>
       </div>
       <div className="flex items-center gap-4 w-full sm:w-auto">
-        <a
-          href="#configurator"
+        <Link
+          to="/customize"
           className="flex-1 sm:flex-none text-center px-8 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform"
         >
           Build Your Cart
-        </a>
+        </Link>
       </div>
     </div>
   </motion.div>
