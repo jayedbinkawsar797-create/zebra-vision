@@ -146,7 +146,7 @@ const Quote = () => {
               animate={{ opacity: 1, y: 0 }}
               className="lg:col-span-2"
             >
-              <div className="rounded-3xl border border-border/20 bg-card/30 backdrop-blur-sm p-8 lg:sticky lg:top-28">
+              <div className="rounded-3xl border border-border/40 bg-secondary p-8 lg:sticky lg:top-28">
                 <h2 className="font-display font-black text-2xl text-foreground mb-1">Your Build</h2>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-6">Configuration Summary</p>
 
