@@ -146,13 +146,13 @@ const Quote = () => {
               animate={{ opacity: 1, y: 0 }}
               className="lg:col-span-2"
             >
-              <div className="rounded-3xl border border-border/20 bg-card/30 backdrop-blur-sm p-8 lg:sticky lg:top-28">
+              <div className="rounded-3xl border border-border/40 bg-secondary p-8 lg:sticky lg:top-28">
                 <h2 className="font-display font-black text-2xl text-foreground mb-1">Your Build</h2>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-6">Configuration Summary</p>
 
                 <div className="space-y-4">
                   {summaryItems.map((item) => (
-                    <div key={item.label} className="flex items-center justify-between py-3 border-b border-border/10 last:border-0">
+                    <div key={item.label} className="flex items-center justify-between py-3 border-b border-border/20 last:border-0">
                       <span className="text-sm text-muted-foreground">{item.label}</span>
                       <div className="flex items-center gap-2">
                         {"color" in item && item.color && (
@@ -190,7 +190,7 @@ const Quote = () => {
                 Fill in your details and we'll prepare a personalized quote for your custom Zebra build.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5 rounded-3xl border border-border/40 bg-secondary p-8">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">First Name</label>
@@ -198,7 +198,7 @@ const Quote = () => {
                       type="text"
                       value={form.firstName}
                       onChange={(e) => updateField("firstName", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                      className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
                       placeholder="John"
                     />
                     {errors.firstName && <p className="text-xs text-primary mt-1">{errors.firstName}</p>}
@@ -209,7 +209,7 @@ const Quote = () => {
                       type="text"
                       value={form.lastName}
                       onChange={(e) => updateField("lastName", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                      className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
                       placeholder="Doe"
                     />
                     {errors.lastName && <p className="text-xs text-primary mt-1">{errors.lastName}</p>}
@@ -223,7 +223,7 @@ const Quote = () => {
                       type="email"
                       value={form.email}
                       onChange={(e) => updateField("email", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                      className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
                       placeholder="john@example.com"
                     />
                     {errors.email && <p className="text-xs text-primary mt-1">{errors.email}</p>}
@@ -234,7 +234,7 @@ const Quote = () => {
                       type="tel"
                       value={form.phone}
                       onChange={(e) => updateField("phone", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                      className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
                       placeholder="(555) 123-4567"
                     />
                     {errors.phone && <p className="text-xs text-primary mt-1">{errors.phone}</p>}
@@ -255,8 +255,8 @@ const Quote = () => {
                         onClick={() => updateField("location", loc.id)}
                         className={`py-3 rounded-xl text-sm font-bold transition-all duration-300 border ${
                           form.location === loc.id
-                            ? "bg-primary/10 border-primary/40 text-foreground"
-                            : "bg-card/30 border-border/20 text-muted-foreground hover:border-border/50"
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background border-border/50 text-muted-foreground hover:border-border/80"
                         }`}
                       >
                         {loc.label}
@@ -274,8 +274,8 @@ const Quote = () => {
                       onClick={() => updateField("paymentPreference", "financing")}
                       className={`flex items-center gap-4 p-5 rounded-2xl transition-all duration-300 border ${
                         form.paymentPreference === "financing"
-                          ? "bg-primary/10 border-primary/40"
-                          : "bg-card/30 border-border/20 hover:border-border/50"
+                          ? "bg-primary/15 border-primary/50"
+                          : "bg-background border-border/50 hover:border-border/80"
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -293,8 +293,8 @@ const Quote = () => {
                       onClick={() => updateField("paymentPreference", "direct")}
                       className={`flex items-center gap-4 p-5 rounded-2xl transition-all duration-300 border ${
                         form.paymentPreference === "direct"
-                          ? "bg-primary/10 border-primary/40"
-                          : "bg-card/30 border-border/20 hover:border-border/50"
+                          ? "bg-primary/15 border-primary/50"
+                          : "bg-background border-border/50 hover:border-border/80"
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -316,7 +316,7 @@ const Quote = () => {
                     value={form.message}
                     onChange={(e) => updateField("message", e.target.value)}
                     rows={3}
-                    className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm resize-none"
+                    className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm resize-none"
                     placeholder="Any special requests or questions..."
                   />
                 </div>
