@@ -108,7 +108,7 @@ const Configurator = () => {
             Build Your <span className="text-gradient-red">Dream Cart</span>
           </h2>
           <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
-            Customize every detail — drag to rotate, then get your personalized quote.
+            Customize every detail, then get your personalized quote.
           </p>
         </motion.div>
 
