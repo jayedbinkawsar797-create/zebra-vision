@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroBg from "@/assets/z2-hero.webp";
 
 const words = ["FUTURE", "FAIRWAY", "LUXURY", "ROAD"];
