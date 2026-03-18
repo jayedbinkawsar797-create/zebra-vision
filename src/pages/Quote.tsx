@@ -293,8 +293,8 @@ const Quote = () => {
                       onClick={() => updateField("paymentPreference", "direct")}
                       className={`flex items-center gap-4 p-5 rounded-2xl transition-all duration-300 border ${
                         form.paymentPreference === "direct"
-                          ? "bg-primary/10 border-primary/40"
-                          : "bg-card/30 border-border/20 hover:border-border/50"
+                          ? "bg-primary/15 border-primary/50"
+                          : "bg-background border-border/50 hover:border-border/80"
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
