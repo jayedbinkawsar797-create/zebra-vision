@@ -190,7 +190,7 @@ const Quote = () => {
                 Fill in your details and we'll prepare a personalized quote for your custom Zebra build.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5 rounded-3xl border border-border/40 bg-secondary p-8">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">First Name</label>
