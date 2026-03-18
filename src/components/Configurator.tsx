@@ -138,7 +138,7 @@ const Configurator = () => {
                 </button>
               </div>
 
-              {/* 360° Cart viewer */}
+              {/* Cart image */}
               <div className="pt-14 pb-8 px-8">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -148,7 +148,11 @@ const Configurator = () => {
                     exit={{ opacity: 0, scale: 0.92 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <Cart360Viewer image={selectedColor.image} colorLabel={selectedColor.label} />
+                    <img
+                      src={selectedColor.image}
+                      alt={`Zebra Cart in ${selectedColor.label}`}
+                      className="w-full object-contain max-h-[420px] drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] mx-auto"
+                    />
                   </motion.div>
                 </AnimatePresence>
               </div>
