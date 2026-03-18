@@ -20,7 +20,7 @@ const StickyReservationBar = () => (
           href="#configurator"
           className="flex-1 sm:flex-none text-center px-8 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform"
         >
-          Reserve for $1,000
+          Build Your Cart
         </a>
       </div>
     </div>

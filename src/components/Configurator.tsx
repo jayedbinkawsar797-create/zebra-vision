@@ -1,21 +1,18 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Palette, Armchair, CircleDot, Gauge, RotateCcw } from "lucide-react";
+import { Check, Palette, Armchair, CircleDot, Gauge, RotateCcw, ArrowRight, Grab } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import cartBlack from "@/assets/cart-black.png";
 import cartBurgundy from "@/assets/cart-burgundy.png";
 import cartBlue from "@/assets/cart-blue.png";
-import cartGrey from "@/assets/cart-grey.webp";
 import cartWhite from "@/assets/cart-white.webp";
-import cartMaroon from "@/assets/cart-maroon.webp";
 
 const colors = [
   { id: "black", label: "Onyx Black", hex: "#1a1a1a", image: cartBlack },
   { id: "burgundy", label: "Royal Burgundy", hex: "#6b1a2a", image: cartBurgundy },
   { id: "blue", label: "Sapphire Blue", hex: "#1a3a8a", image: cartBlue },
-  { id: "grey", label: "Platinum Grey", hex: "#8a8a8a", image: cartGrey },
   { id: "white", label: "Pearl White", hex: "#e8e8e8", image: cartWhite },
-  { id: "maroon", label: "Deep Maroon", hex: "#5a1020", image: cartMaroon },
 ];
 
 const seatOptions = [
@@ -27,42 +24,137 @@ const seatOptions = [
 
 const configOptions = [
   { id: "4seat", label: "Breeze 4L", sub: "4-Seater", price: "$14,999", battery: "51.2V 150Ah", motor: "5KW" },
+  { id: "4seat-pro", label: "Breeze 4L Pro", sub: "4-Seater Pro", price: "$15,999", battery: "51.2V 230Ah", motor: "5KW" },
   { id: "6seat", label: "Terrain 6", sub: "6-Seater", price: "$17,999", battery: "51.2V 230Ah", motor: "5KW" },
   { id: "6seat-pro", label: "Terrain 6 Pro", sub: "6-Seater Pro", price: "$19,999", battery: "73.6V 205Ah", motor: "7.5KW" },
 ];
 
 const tireOptions = [
-  { id: "street", label: "Street" },
-  { id: "allterrain", label: "All-Terrain" },
+  { id: "street", label: "Street Tires" },
+  { id: "allterrain", label: "All-Terrain Tires" },
 ];
 
 const rimOptions = [
   { id: "chrome-black", label: "Chrome & Black" },
   { id: "all-black", label: "All Black" },
   { id: "chrome-red", label: "Chrome & Red" },
+  { id: "red-chrome", label: "Red & Chrome" },
 ];
 
+const accessoryOptions = [
+  { id: "lightbar", label: "Small Bumper Light Bar", price: "+$299" },
+];
+
+// 360 rotation component using single image with CSS rotation simulation
+const Cart360Viewer = ({ image, colorLabel }: { image: string; colorLabel: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [rotation, setRotation] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const lastX = useRef(0);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setIsDragging(true);
+    lastX.current = e.clientX;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    const delta = e.clientX - lastX.current;
+    setRotation((prev) => prev + delta * 0.4);
+    lastX.current = e.clientX;
+  };
+
+  const handlePointerUp = () => setIsDragging(false);
+
+  // Auto-rotate when not dragging
+  useEffect(() => {
+    if (isDragging) return;
+    const interval = setInterval(() => {
+      setRotation((prev) => prev + 0.15);
+    }, 30);
+    return () => clearInterval(interval);
+  }, [isDragging]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative cursor-grab active:cursor-grabbing select-none"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+    >
+      <div
+        style={{
+          transform: `perspective(1200px) rotateY(${rotation}deg)`,
+          transformStyle: "preserve-3d",
+          transition: isDragging ? "none" : "transform 0.05s linear",
+        }}
+      >
+        <img
+          src={image}
+          alt={`Zebra Cart in ${colorLabel}`}
+          className="w-full object-contain max-h-[420px] drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] mx-auto pointer-events-none"
+          draggable={false}
+        />
+      </div>
+      {/* Drag hint */}
+      <motion.div
+        initial={{ opacity: 1 }}
+        animate={{ opacity: isDragging ? 0 : 0.6 }}
+        className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest font-semibold"
+      >
+        <Grab className="w-3 h-3" /> Drag to Rotate
+      </motion.div>
+    </div>
+  );
+};
+
 const Configurator = () => {
+  const navigate = useNavigate();
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [selectedSeat, setSelectedSeat] = useState(seatOptions[0]);
-  const [selectedConfig, setSelectedConfig] = useState(configOptions[1]);
+  const [selectedConfig, setSelectedConfig] = useState(configOptions[2]);
   const [selectedTire, setSelectedTire] = useState(tireOptions[1]);
   const [selectedRim, setSelectedRim] = useState(rimOptions[0]);
+  const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"model" | "exterior" | "interior" | "wheels">("model");
 
   const tabs = [
     { id: "model" as const, label: "Model", icon: Gauge },
-    { id: "exterior" as const, label: "Exterior", icon: Palette },
-    { id: "interior" as const, label: "Interior", icon: Armchair },
+    { id: "exterior" as const, label: "Color", icon: Palette },
+    { id: "interior" as const, label: "Seats", icon: Armchair },
     { id: "wheels" as const, label: "Wheels", icon: CircleDot },
   ];
 
   const handleReset = () => {
     setSelectedColor(colors[0]);
     setSelectedSeat(seatOptions[0]);
-    setSelectedConfig(configOptions[1]);
+    setSelectedConfig(configOptions[2]);
     setSelectedTire(tireOptions[1]);
     setSelectedRim(rimOptions[0]);
+    setSelectedAccessories([]);
+  };
+
+  const toggleAccessory = (id: string) => {
+    setSelectedAccessories((prev) =>
+      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
+    );
+  };
+
+  const handleContinue = () => {
+    const config = {
+      model: selectedConfig,
+      color: { id: selectedColor.id, label: selectedColor.label, hex: selectedColor.hex },
+      seat: selectedSeat,
+      tire: selectedTire,
+      rim: selectedRim,
+      accessories: selectedAccessories,
+    };
+    // Store in sessionStorage for the quote page
+    sessionStorage.setItem("zebra-config", JSON.stringify(config));
+    navigate("/quote");
   };
 
   return (
@@ -81,7 +173,7 @@ const Configurator = () => {
             Build Your <span className="text-gradient-red">Dream Cart</span>
           </h2>
           <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
-            Customize every detail — see changes in real time.
+            Customize every detail — drag to rotate, then get your personalized quote.
           </p>
         </motion.div>
 
@@ -93,14 +185,14 @@ const Configurator = () => {
             viewport={{ once: true }}
             className="relative lg:sticky lg:top-28"
           >
-            <div className="relative rounded-3xl border border-border/20 bg-card/30 backdrop-blur-sm overflow-hidden" style={{ perspective: "1200px" }}>
+            <div className="relative rounded-3xl border border-border/20 bg-card/30 backdrop-blur-sm overflow-hidden">
               {/* Ambient glow */}
               <div
                 className="absolute inset-0 opacity-10 blur-[100px] transition-colors duration-700"
                 style={{ backgroundColor: selectedColor.hex }}
               />
 
-              {/* Config summary strip */}
+              {/* Config strip */}
               <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full border-2 border-border/50" style={{ backgroundColor: selectedColor.hex }} />
@@ -111,27 +203,22 @@ const Configurator = () => {
                 </button>
               </div>
 
-              {/* Cart image */}
+              {/* 360° Cart viewer */}
               <div className="pt-14 pb-8 px-8">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={selectedColor.id}
-                    initial={{ opacity: 0, scale: 0.92, rotateY: -3 }}
-                    animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                    exit={{ opacity: 0, scale: 0.92, rotateY: 3 }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                    style={{ transformStyle: "preserve-3d" }}
+                    initial={{ opacity: 0, scale: 0.92 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.92 }}
+                    transition={{ duration: 0.4 }}
                   >
-                    <img
-                      src={selectedColor.image}
-                      alt={`Zebra Cart in ${selectedColor.label}`}
-                      className="w-full object-contain max-h-[420px] drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] mx-auto"
-                    />
+                    <Cart360Viewer image={selectedColor.image} colorLabel={selectedColor.label} />
                   </motion.div>
                 </AnimatePresence>
               </div>
 
-              {/* Ground line */}
+              {/* Ground reflection */}
               <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[60%] h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
 
               {/* Price badge */}
@@ -228,12 +315,12 @@ const Configurator = () => {
                 {activeTab === "exterior" && (
                   <div>
                     <h3 className="font-display font-bold text-sm uppercase tracking-wider text-muted-foreground mb-4">Body Color</h3>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       {colors.map((color) => (
                         <button
                           key={color.id}
                           onClick={() => setSelectedColor(color)}
-                          className={`group flex flex-col items-center gap-3 p-4 rounded-2xl transition-all duration-300 border ${
+                          className={`group flex items-center gap-4 p-5 rounded-2xl transition-all duration-300 border ${
                             selectedColor.id === color.id
                               ? "bg-primary/10 border-primary/40"
                               : "bg-card/30 border-border/20 hover:border-border/50"
@@ -241,20 +328,20 @@ const Configurator = () => {
                         >
                           <div className="relative">
                             <div
-                              className="w-12 h-12 rounded-full border-2 transition-all duration-300 group-hover:scale-110"
+                              className="w-14 h-14 rounded-full border-2 transition-all duration-300 group-hover:scale-110"
                               style={{
                                 backgroundColor: color.hex,
                                 borderColor: selectedColor.id === color.id ? "hsl(var(--primary))" : "hsl(var(--border))",
-                                boxShadow: selectedColor.id === color.id ? `0 0 20px ${color.hex}50` : "none",
+                                boxShadow: selectedColor.id === color.id ? `0 0 25px ${color.hex}60` : "none",
                               }}
                             />
                             {selectedColor.id === color.id && (
-                              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                                <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                              <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                <Check className="w-3 h-3 text-primary-foreground" />
                               </div>
                             )}
                           </div>
-                          <span className="text-[11px] text-muted-foreground font-semibold text-center">{color.label}</span>
+                          <span className="text-sm text-foreground font-bold">{color.label}</span>
                         </button>
                       ))}
                     </div>
@@ -314,7 +401,7 @@ const Configurator = () => {
                     </div>
                     <div>
                       <h3 className="font-display font-bold text-sm uppercase tracking-wider text-muted-foreground mb-4">Rim Style</h3>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         {rimOptions.map((rim) => (
                           <button
                             key={rim.id}
@@ -330,21 +417,48 @@ const Configurator = () => {
                         ))}
                       </div>
                     </div>
+                    <div>
+                      <h3 className="font-display font-bold text-sm uppercase tracking-wider text-muted-foreground mb-4">Accessories</h3>
+                      {accessoryOptions.map((acc) => (
+                        <button
+                          key={acc.id}
+                          onClick={() => toggleAccessory(acc.id)}
+                          className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 border ${
+                            selectedAccessories.includes(acc.id)
+                              ? "bg-primary/10 border-primary/40"
+                              : "bg-card/30 border-border/20 hover:border-border/50"
+                          }`}
+                        >
+                          <span className="text-sm font-bold text-foreground">{acc.label}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs text-muted-foreground">{acc.price}</span>
+                            {selectedAccessories.includes(acc.id) && (
+                              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                <Check className="w-3 h-3 text-primary-foreground" />
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </motion.div>
             </AnimatePresence>
 
-            {/* Reserve CTA */}
+            {/* Continue CTA */}
             <div className="pt-4 space-y-3">
-              <a
-                href="#testdrive"
-                className="block w-full text-center py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300"
+              <button
+                onClick={handleContinue}
+                className="group block w-full text-center py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300"
               >
-                Reserve for $1,000 →
-              </a>
+                <span className="flex items-center justify-center gap-2">
+                  Continue to Quote
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </button>
               <p className="text-center text-[11px] text-muted-foreground">
-                Fully refundable deposit · No obligation
+                Review your build & get a personalized quote
               </p>
             </div>
           </motion.div>
