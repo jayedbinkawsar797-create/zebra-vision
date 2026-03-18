@@ -6,20 +6,20 @@ const StickyReservationBar = () => (
     initial={{ y: 100 }}
     animate={{ y: 0 }}
     transition={{ delay: 2, duration: 0.5 }}
-    className="fixed bottom-0 left-0 right-0 z-40 glass-strong border-t border-border"
+    className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/30 bg-background/80 backdrop-blur-xl"
   >
     <div className="container mx-auto px-6 py-3 flex items-center justify-between">
       <div className="hidden sm:flex items-center gap-3">
-        <Shield className="w-5 h-5 text-primary" />
+        <Shield className="w-4 h-4 text-primary" />
         <span className="text-sm text-muted-foreground">
           <span className="text-foreground font-semibold">5-Year Warranty</span> · Street Legal · Solar Powered
         </span>
       </div>
       <div className="flex items-center gap-4 w-full sm:w-auto">
-        <span className="text-sm text-muted-foreground hidden md:block">Starting from <span className="text-foreground font-display font-bold text-lg">$14,999</span></span>
+        <span className="text-sm text-muted-foreground hidden md:block">Starting from <span className="text-foreground font-display font-black text-lg">$14,999</span></span>
         <a
           href="#configurator"
-          className="flex-1 sm:flex-none text-center px-6 py-2.5 rounded-lg bg-accent text-accent-foreground font-bold text-sm glow-amber hover:scale-105 transition-transform"
+          className="flex-1 sm:flex-none text-center px-6 py-2.5 rounded-xl bg-accent text-accent-foreground font-bold text-sm hover:scale-105 transition-transform"
         >
           Reserve for $1,000
         </a>

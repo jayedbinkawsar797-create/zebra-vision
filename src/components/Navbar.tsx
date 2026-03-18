@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone } from "lucide-react";
 import zebraLogo from "@/assets/zebra-logo.png";
@@ -14,17 +14,26 @@ const navLinks = [
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50 glass-strong"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? "glass-strong shadow-lg" : "bg-transparent"
+      }`}
     >
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
         <a href="#hero" className="flex items-center gap-2">
-          <img src={zebraLogo} alt="Zebra Golf Cart" className="h-10 w-auto" />
+          <img src={zebraLogo} alt="Zebra Golf Cart" className="h-9 w-auto" />
         </a>
 
         {/* Desktop */}
@@ -33,7 +42,7 @@ const Navbar = () => {
             <a
               key={link.label}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-300 tracking-wide uppercase"
+              className="text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors duration-300 tracking-widest uppercase"
             >
               {link.label}
             </a>
@@ -47,7 +56,7 @@ const Navbar = () => {
           </a>
           <a
             href="#configurator"
-            className="px-5 py-2.5 rounded-lg bg-accent text-accent-foreground font-semibold text-sm hover:opacity-90 transition-opacity glow-amber"
+            className="px-5 py-2.5 rounded-xl bg-accent text-accent-foreground font-bold text-sm hover:scale-105 transition-transform duration-300"
           >
             Build Yours
           </a>
@@ -77,14 +86,14 @@ const Navbar = () => {
                   key={link.label}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-foreground font-medium text-lg"
+                  className="text-foreground font-semibold text-base tracking-wide"
                 >
                   {link.label}
                 </a>
               ))}
               <a
                 href="#configurator"
-                className="mt-2 px-5 py-3 rounded-lg bg-accent text-accent-foreground font-semibold text-center"
+                className="mt-2 px-5 py-3 rounded-xl bg-accent text-accent-foreground font-bold text-center"
               >
                 Build Yours
               </a>
