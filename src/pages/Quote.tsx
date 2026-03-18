@@ -152,7 +152,7 @@ const Quote = () => {
 
                 <div className="space-y-4">
                   {summaryItems.map((item) => (
-                    <div key={item.label} className="flex items-center justify-between py-3 border-b border-border/10 last:border-0">
+                    <div key={item.label} className="flex items-center justify-between py-3 border-b border-border/20 last:border-0">
                       <span className="text-sm text-muted-foreground">{item.label}</span>
                       <div className="flex items-center gap-2">
                         {"color" in item && item.color && (
