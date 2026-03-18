@@ -1,26 +1,31 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import zebraLogo from "@/assets/zebra-logo.png";
 
 const navLinks = [
-  { label: "Home", href: "#hero" },
-  { label: "Models", href: "#models" },
-  { label: "Configure", href: "#configurator" },
-  { label: "Features", href: "#features" },
-  { label: "Financing", href: "#financing" },
-  { label: "Test Drive", href: "#testdrive" },
+  { label: "Home", href: "/" },
+  { label: "Customize", href: "/customize" },
+  { label: "Book a Demo", href: "/book-demo" },
+  { label: "Dealer Application", href: "/dealer" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location]);
 
   return (
     <motion.nav
@@ -32,20 +37,22 @@ const Navbar = () => {
       }`}
     >
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
-        <a href="#hero" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <img src={zebraLogo} alt="Zebra Golf Cart" className="h-9 w-auto" />
-        </a>
+        </Link>
 
         {/* Desktop */}
         <div className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.label}
-              href={link.href}
-              className="link-underline text-[12px] font-bold text-muted-foreground hover:text-foreground transition-colors duration-300 tracking-[0.15em] uppercase"
+              to={link.href}
+              className={`link-underline text-[12px] font-bold transition-colors duration-300 tracking-[0.15em] uppercase ${
+                location.pathname === link.href ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -54,12 +61,12 @@ const Navbar = () => {
             <Phone className="w-4 h-4" />
             (954) 820-4220
           </a>
-          <a
-            href="#configurator"
+          <Link
+            to="/customize"
             className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform duration-300"
           >
             Build Yours
-          </a>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -79,22 +86,22 @@ const Navbar = () => {
           >
             <div className="flex flex-col gap-4 p-6">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.label}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="text-foreground font-bold text-base tracking-wide"
+                  to={link.href}
+                  className={`font-bold text-base tracking-wide ${
+                    location.pathname === link.href ? "text-primary" : "text-foreground"
+                  }`}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
-              <a
-                href="#configurator"
-                onClick={() => setMobileOpen(false)}
+              <Link
+                to="/customize"
                 className="mt-2 px-5 py-3 rounded-full bg-primary text-primary-foreground font-bold text-center text-sm uppercase tracking-widest"
               >
                 Build Yours
-              </a>
+              </Link>
             </div>
           </motion.div>
         )}
