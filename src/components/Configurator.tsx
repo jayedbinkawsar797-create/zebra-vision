@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Palette, Armchair, CircleDot, Gauge, RotateCcw, ArrowRight, Grab } from "lucide-react";
+import { Check, Palette, Armchair, CircleDot, Gauge, RotateCcw, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import cartBlack from "@/assets/cart-black.png";
