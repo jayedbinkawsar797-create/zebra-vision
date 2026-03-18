@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, Award, Leaf } from "lucide-react";
+import { MapPin, Award, Leaf, Flag } from "lucide-react";
 
 const AboutSection = () => (
   <section id="about" className="relative py-28">
@@ -11,19 +11,23 @@ const AboutSection = () => (
           viewport={{ once: true }}
           className="space-y-6"
         >
-          <p className="text-primary text-xs font-bold uppercase tracking-[0.25em]">Our Mission</p>
+          <p className="text-primary text-xs font-bold uppercase tracking-[0.3em]">Our Mission</p>
           <h2 className="text-4xl md:text-5xl font-display font-black text-foreground tracking-tight">
-            Harmonizing Power, Elegance & <span className="text-gradient-cyan">Innovation</span>
+            Harmonizing Power, Elegance & <span className="text-gradient-red">Innovation</span>
           </h2>
           <p className="text-muted-foreground leading-relaxed">
             Zebra Golf Cart is becoming the premier US brand for street-legal luxury electric vehicles.
             We blend cutting-edge lithium technology with solar integration and automotive-grade
-            craftsmanship — delivering an unparalleled ownership experience.
+            craftsmanship.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             From our advanced rust-proof aluminum chassis to diamond-stitched leather interiors,
             every Zebra cart is engineered for those who refuse to compromise.
           </p>
+          <div className="flex items-center gap-3 pt-2">
+            <Flag className="w-5 h-5 text-primary" />
+            <span className="text-sm font-bold text-foreground uppercase tracking-wider">Designed & Assembled in the USA</span>
+          </div>
         </motion.div>
 
         <motion.div
@@ -33,11 +37,11 @@ const AboutSection = () => (
           className="space-y-4"
         >
           {[
-            { icon: MapPin, title: "Showroom Locations", desc: "Visit us in Florida and Arizona. More locations coming soon across the US." },
+            { icon: MapPin, title: "Showroom Locations", desc: "Visit us in Florida, Arizona, and Atlanta. More locations coming soon." },
             { icon: Award, title: "Industry-Leading Warranty", desc: "5-year lithium battery warranty and 1-year coverage on frame and major components." },
             { icon: Leaf, title: "Eco-Conscious Innovation", desc: "Solar-integrated roofs and zero-emission electric powertrains for a greener future." },
           ].map((item) => (
-            <div key={item.title} className="rounded-2xl border border-border/30 bg-card/20 backdrop-blur-sm p-6 flex gap-5 hover:-translate-y-1 hover:border-primary/20 hover:bg-card/40 transition-all duration-500">
+            <div key={item.title} className="rounded-2xl border border-border/20 bg-card/20 p-6 flex gap-5 hover:-translate-y-1 hover:border-primary/20 hover:bg-card/40 transition-all duration-500">
               <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <item.icon className="w-5 h-5 text-primary" />
               </div>
