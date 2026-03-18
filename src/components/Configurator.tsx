@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Palette, Armchair, CircleDot, Gauge, RotateCcw, ArrowRight, Grab } from "lucide-react";
+import { Check, Palette, Armchair, CircleDot, Gauge, RotateCcw, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import cartBlack from "@/assets/cart-black.png";
@@ -45,71 +45,6 @@ const accessoryOptions = [
   { id: "lightbar", label: "Small Bumper Light Bar", price: "+$299" },
 ];
 
-// 360 rotation component using single image with CSS rotation simulation
-const Cart360Viewer = ({ image, colorLabel }: { image: string; colorLabel: string }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [rotation, setRotation] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const lastX = useRef(0);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    setIsDragging(true);
-    lastX.current = e.clientX;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    const delta = e.clientX - lastX.current;
-    setRotation((prev) => prev + delta * 0.4);
-    lastX.current = e.clientX;
-  };
-
-  const handlePointerUp = () => setIsDragging(false);
-
-  // Auto-rotate when not dragging
-  useEffect(() => {
-    if (isDragging) return;
-    const interval = setInterval(() => {
-      setRotation((prev) => prev + 0.15);
-    }, 30);
-    return () => clearInterval(interval);
-  }, [isDragging]);
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative cursor-grab active:cursor-grabbing select-none"
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
-    >
-      <div
-        style={{
-          transform: `perspective(1200px) rotateY(${rotation}deg)`,
-          transformStyle: "preserve-3d",
-          transition: isDragging ? "none" : "transform 0.05s linear",
-        }}
-      >
-        <img
-          src={image}
-          alt={`Zebra Cart in ${colorLabel}`}
-          className="w-full object-contain max-h-[420px] drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] mx-auto pointer-events-none"
-          draggable={false}
-        />
-      </div>
-      {/* Drag hint */}
-      <motion.div
-        initial={{ opacity: 1 }}
-        animate={{ opacity: isDragging ? 0 : 0.6 }}
-        className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest font-semibold"
-      >
-        <Grab className="w-3 h-3" /> Drag to Rotate
-      </motion.div>
-    </div>
-  );
-};
 
 const Configurator = () => {
   const navigate = useNavigate();
@@ -173,7 +108,7 @@ const Configurator = () => {
             Build Your <span className="text-gradient-red">Dream Cart</span>
           </h2>
           <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
-            Customize every detail — drag to rotate, then get your personalized quote.
+            Customize every detail, then get your personalized quote.
           </p>
         </motion.div>
 
@@ -203,7 +138,7 @@ const Configurator = () => {
                 </button>
               </div>
 
-              {/* 360° Cart viewer */}
+              {/* Cart image */}
               <div className="pt-14 pb-8 px-8">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -213,7 +148,11 @@ const Configurator = () => {
                     exit={{ opacity: 0, scale: 0.92 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <Cart360Viewer image={selectedColor.image} colorLabel={selectedColor.label} />
+                    <img
+                      src={selectedColor.image}
+                      alt={`Zebra Cart in ${selectedColor.label}`}
+                      className="w-full object-contain max-h-[420px] drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] mx-auto"
+                    />
                   </motion.div>
                 </AnimatePresence>
               </div>
