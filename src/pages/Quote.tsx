@@ -255,8 +255,8 @@ const Quote = () => {
                         onClick={() => updateField("location", loc.id)}
                         className={`py-3 rounded-xl text-sm font-bold transition-all duration-300 border ${
                           form.location === loc.id
-                            ? "bg-primary/10 border-primary/40 text-foreground"
-                            : "bg-card/30 border-border/20 text-muted-foreground hover:border-border/50"
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background border-border/50 text-muted-foreground hover:border-border/80"
                         }`}
                       >
                         {loc.label}
