@@ -209,7 +209,7 @@ const Quote = () => {
                       type="text"
                       value={form.lastName}
                       onChange={(e) => updateField("lastName", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                      className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
                       placeholder="Doe"
                     />
                     {errors.lastName && <p className="text-xs text-primary mt-1">{errors.lastName}</p>}
