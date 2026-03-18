@@ -12,9 +12,9 @@ const specs = [
 
 const SpecsSection = () => {
   return (
-    <section id="specs" className="relative py-24">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/20 to-background" />
-      
+    <section id="specs" className="relative py-28">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_30%_at_50%_50%,hsl(193_100%_50%/0.03),transparent)]" />
+
       <div className="container relative z-10 mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -22,13 +22,13 @@ const SpecsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-3">Performance Data</p>
-          <h2 className="text-4xl md:text-6xl font-display font-bold">
+          <p className="text-primary text-xs font-bold uppercase tracking-[0.25em] mb-4">Performance Data</p>
+          <h2 className="text-4xl md:text-6xl font-display font-black tracking-tight">
             Built to <span className="text-gradient-cyan">Perform</span>
           </h2>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {specs.map((spec, i) => (
             <motion.div
               key={spec.label}
@@ -36,18 +36,17 @@ const SpecsSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="glass-strong rounded-2xl p-6 group hover:-translate-y-1 transition-all duration-500"
+              className="group rounded-2xl border border-border/30 bg-card/20 backdrop-blur-sm p-6 hover:-translate-y-1 hover:border-primary/20 hover:bg-card/40 transition-all duration-500"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
                   <spec.icon className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-xs text-muted-foreground uppercase tracking-wider">{spec.label}</span>
+                <span className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold">{spec.label}</span>
               </div>
-              <p className="text-3xl font-display font-bold text-foreground mb-1">{spec.value}</p>
+              <p className="text-3xl font-display font-black text-foreground mb-1">{spec.value}</p>
               <p className="text-sm text-muted-foreground mb-4">{spec.sub}</p>
-              {/* Progress bar */}
-              <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+              <div className="h-1 rounded-full bg-border/30 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   whileInView={{ width: `${spec.progress}%` }}
@@ -60,14 +59,14 @@ const SpecsSection = () => {
           ))}
         </div>
 
-        {/* Comparison highlight */}
+        {/* Comparison */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-16 glass-strong rounded-2xl p-8 md:p-12"
+          className="mt-16 rounded-3xl border border-border/30 bg-card/20 backdrop-blur-sm p-8 md:p-12"
         >
-          <h3 className="font-display font-bold text-2xl mb-8 text-center text-foreground">
+          <h3 className="font-display font-black text-2xl mb-8 text-center text-foreground tracking-tight">
             Zebra vs. Traditional Golf Carts
           </h3>
           <div className="grid md:grid-cols-3 gap-8">
@@ -83,7 +82,7 @@ const SpecsSection = () => {
                     <span className="text-primary font-semibold">Zebra</span>
                     <span className="text-foreground">{row.zebra}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                  <div className="h-2 rounded-full bg-border/30 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${row.zebraBar}%` }}
@@ -98,7 +97,7 @@ const SpecsSection = () => {
                     <span className="text-muted-foreground">Traditional</span>
                     <span className="text-muted-foreground">{row.trad}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                  <div className="h-2 rounded-full bg-border/30 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${row.tradBar}%` }}
