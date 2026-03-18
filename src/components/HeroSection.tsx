@@ -128,21 +128,21 @@ const HeroSection = () => {
           transition={{ duration: 0.7, delay: 1.4 }}
           className="flex flex-wrap justify-center gap-4"
         >
-          <a
-            href="#configurator"
+          <Link
+            to="/customize"
             className="group relative px-10 py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest overflow-hidden transition-all duration-300 hover:scale-105 glow-red"
           >
             <span className="relative z-10 flex items-center gap-2">
               Build Your Cart
               <span className="inline-block group-hover:translate-x-1 transition-transform">→</span>
             </span>
-          </a>
-          <a
-            href="#testdrive"
+          </Link>
+          <Link
+            to="/book-demo"
             className="px-10 py-4 rounded-full border border-foreground/20 bg-foreground/5 backdrop-blur-xl font-bold text-sm uppercase tracking-widest text-foreground hover:bg-foreground/10 hover:border-primary/40 transition-all duration-300"
           >
             Book a Test Drive
-          </a>
+          </Link>
         </motion.div>
       </div>
 
