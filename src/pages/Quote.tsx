@@ -335,6 +335,19 @@ const Quote = () => {
                       </div>
                     </button>
                   </div>
+                  {form.paymentPreference === "financing" && (
+                    <div className="mt-3 p-3.5 rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Looking for instant financing pre-approval?</span>
+                      <a
+                        href="https://dealerdirect.apptraker.com/myaccount/loan"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary font-bold hover:underline inline-flex items-center gap-1"
+                      >
+                        Apply Online <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 <div>
