@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Send, Building2, Users, Globe, TrendingUp, Check } from "lucide-react";
+import { Send, Building2, Users, Globe, TrendingUp, Check, Loader2 } from "lucide-react";
 import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { sendLeadEmail } from "@/lib/brevo";
 
 const dealerSchema = z.object({
   businessName: z.string().trim().min(1, "Business name is required").max(100),
@@ -45,6 +47,7 @@ const yearOptions = [
 
 const DealerApplication = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState<DealerForm>({
     businessName: "",
@@ -64,7 +67,7 @@ const DealerApplication = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = dealerSchema.safeParse(form);
     if (!result.success) {
@@ -75,6 +78,25 @@ const DealerApplication = () => {
       setErrors(fieldErrors);
       return;
     }
+
+    setIsSubmitting(true);
+    await sendLeadEmail({
+      type: "dealer",
+      subject: `Dealer Application from ${form.businessName}`,
+      senderName: form.contactName,
+      senderEmail: form.email,
+      senderPhone: form.phone,
+      data: {
+        businessName: form.businessName,
+        contactName: form.contactName,
+        website: form.website || "N/A",
+        location: `${form.city}, ${form.state}`,
+        businessType: businessTypes.find((b) => b.id === form.businessType)?.label || form.businessType,
+        yearsInBusiness: yearOptions.find((y) => y.id === form.yearsInBusiness)?.label || form.yearsInBusiness,
+        additionalInfo: form.message || "N/A",
+      },
+    });
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
@@ -93,9 +115,9 @@ const DealerApplication = () => {
               Application <span className="text-gradient-red">Received!</span>
             </h1>
             <p className="text-muted-foreground mb-8">Thank you for your interest in becoming a Zebra dealer. Our partnerships team will review your application and reach out within 48 hours.</p>
-            <a href="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block">
+            <Link to="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block">
               Back to Home
-            </a>
+            </Link>
           </motion.div>
         </div>
         <Footer />
@@ -229,9 +251,21 @@ const DealerApplication = () => {
                     className={`${inputClasses} resize-none`} placeholder="Tell us about your business and why you'd like to partner with Zebra..." />
                 </div>
 
-                <button type="submit" className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none"
+                >
                   <span className="flex items-center justify-center gap-2">
-                    <Send className="w-4 h-4" /> Submit Application
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" /> Submitting Application...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" /> Submit Application
+                      </>
+                    )}
                   </span>
                 </button>
                 <p className="text-center text-[11px] text-muted-foreground">Our team reviews applications within 48 business hours</p>

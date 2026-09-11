@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, Send, CreditCard, Landmark } from "lucide-react";
+import { ArrowLeft, Check, Send, CreditCard, Landmark, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { z } from "zod";
+import { sendLeadEmail } from "@/lib/brevo";
 
 const contactSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50),
   lastName: z.string().trim().min(1, "Last name is required").max(50),
   email: z.string().trim().email("Invalid email address").max(255),
   phone: z.string().trim().min(7, "Phone number is required").max(20),
-  location: z.enum(["florida", "arizona", "other"]),
+  location: z.enum(["florida", "arizona", "atlanta", "other"]),
   paymentPreference: z.enum(["financing", "direct"]),
   message: z.string().trim().max(500).optional(),
 });
@@ -31,6 +32,7 @@ const Quote = () => {
   const navigate = useNavigate();
   const [config, setConfig] = useState<ConfigData | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState<ContactForm>({
@@ -46,13 +48,13 @@ const Quote = () => {
   useEffect(() => {
     const stored = sessionStorage.getItem("zebra-config");
     if (!stored) {
-      navigate("/");
+      navigate("/customize");
       return;
     }
     try {
       setConfig(JSON.parse(stored));
     } catch {
-      navigate("/");
+      navigate("/customize");
     }
   }, [navigate]);
 
@@ -61,7 +63,7 @@ const Quote = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = contactSchema.safeParse(form);
     if (!result.success) {
@@ -72,7 +74,31 @@ const Quote = () => {
       setErrors(fieldErrors);
       return;
     }
-    // In production this would submit to backend
+    if (!config) return;
+
+    setIsSubmitting(true);
+    await sendLeadEmail({
+      type: "quote",
+      subject: `Quote Request for ${config.model.label} (${config.model.sub})`,
+      senderName: `${form.firstName} ${form.lastName}`,
+      senderEmail: form.email,
+      senderPhone: form.phone,
+      data: {
+        model: `${config.model.label} (${config.model.sub})`,
+        price: config.model.price,
+        battery: config.model.battery,
+        motor: config.model.motor,
+        bodyColor: config.color.label,
+        seat: config.seat.label,
+        tire: config.tire.label,
+        rim: config.rim.label,
+        accessories: config.accessories.length > 0 ? config.accessories.join(", ") : "None",
+        preferredLocation: form.location,
+        paymentPreference: form.paymentPreference,
+        message: form.message || "N/A",
+      },
+    });
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
@@ -111,12 +137,12 @@ const Quote = () => {
             <p className="text-muted-foreground mb-8">
               Thank you, {form.firstName}! Our team will review your custom build and get back to you within 24 hours with a detailed quote.
             </p>
-            <button
-              onClick={() => navigate("/")}
-              className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform"
+            <Link
+              to="/"
+              className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block"
             >
               Back to Home
-            </button>
+            </Link>
           </motion.div>
         </div>
         <Footer />
@@ -133,7 +159,7 @@ const Quote = () => {
           <motion.button
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/customize")}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-10 font-semibold uppercase tracking-wider"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Configurator
@@ -243,10 +269,11 @@ const Quote = () => {
 
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Preferred Location</label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
                       { id: "florida", label: "Florida" },
                       { id: "arizona", label: "Arizona" },
+                      { id: "atlanta", label: "Atlanta" },
                       { id: "other", label: "Other" },
                     ].map((loc) => (
                       <button
@@ -323,12 +350,22 @@ const Quote = () => {
 
                 <button
                   type="submit"
-                  className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300"
+                  disabled={isSubmitting}
+                  className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none"
                 >
                   <span className="flex items-center justify-center gap-2">
-                    <Send className="w-4 h-4" />
-                    Submit Quote Request
-                    <ArrowLeft className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform" />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Submitting Quote Request...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        Submit Quote Request
+                        <ArrowLeft className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
                   </span>
                 </button>
 

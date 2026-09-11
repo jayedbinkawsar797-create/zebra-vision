@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import cartAngle1 from "@/assets/cart-angle1.png";
 import cartAngle2 from "@/assets/cart-angle2.png";
 import cartAngle3 from "@/assets/cart-angle3.png";
@@ -90,12 +91,12 @@ const ModelsShowcase = () => {
                     </li>
                   ))}
                 </ul>
-                <a
-                  href="#configurator"
+                <Link
+                  to="/customize"
                   className="block w-full text-center py-3 rounded-full border border-primary/30 text-primary font-bold text-sm uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                 >
                   Configure →
-                </a>
+                </Link>
               </div>
             </motion.div>
           ))}

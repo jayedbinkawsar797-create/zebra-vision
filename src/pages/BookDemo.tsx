@@ -1,20 +1,21 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CalendarIcon, MapPin, Send, Check, Clock, Car } from "lucide-react";
+import { CalendarIcon, MapPin, Send, Check, Clock, Car, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { sendLeadEmail } from "@/lib/brevo";
 
 const bookingSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50),
   lastName: z.string().trim().min(1, "Last name is required").max(50),
   email: z.string().trim().email("Invalid email").max(255),
   phone: z.string().trim().min(7, "Phone is required").max(20),
-  location: z.enum(["florida", "arizona"]),
+  location: z.enum(["florida", "arizona", "atlanta"]),
   date: z.date({ required_error: "Please select a date" }),
   timeSlot: z.string().min(1, "Please select a time"),
   model: z.enum(["any", "breeze-4l", "terrain-6", "terrain-6-pro"]),
@@ -37,6 +38,7 @@ const models = [
 
 const BookDemo = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState<Omit<BookingForm, "date"> & { date?: Date }>({
     firstName: "",
@@ -55,7 +57,7 @@ const BookDemo = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = bookingSchema.safeParse(form);
     if (!result.success) {
@@ -66,12 +68,31 @@ const BookDemo = () => {
       setErrors(fieldErrors);
       return;
     }
+
+    setIsSubmitting(true);
+    const modelLabel = models.find((m) => m.id === form.model)?.label || form.model;
+    await sendLeadEmail({
+      type: "demo",
+      subject: `Test Drive Booking for ${modelLabel} at ${form.location.toUpperCase()}`,
+      senderName: `${form.firstName} ${form.lastName}`,
+      senderEmail: form.email,
+      senderPhone: form.phone,
+      data: {
+        model: modelLabel,
+        location: `${form.location.charAt(0).toUpperCase() + form.location.slice(1)} Showroom`,
+        scheduledDate: form.date ? format(form.date, "MMMM d, yyyy") : "N/A",
+        timeSlot: form.timeSlot,
+        notes: form.message || "N/A",
+      },
+    });
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
   const inputClasses = "w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm";
 
   if (submitted) {
+    const locationName = form.location === "florida" ? "Florida" : form.location === "arizona" ? "Arizona" : "Atlanta";
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -86,10 +107,10 @@ const BookDemo = () => {
             <p className="text-muted-foreground mb-2">
               Your test drive is scheduled for <span className="text-foreground font-bold">{form.date ? format(form.date, "MMMM d, yyyy") : ""}</span> at <span className="text-foreground font-bold">{form.timeSlot}</span>.
             </p>
-            <p className="text-muted-foreground mb-8">We'll send a confirmation email with directions to our {form.location === "florida" ? "Florida" : "Arizona"} showroom.</p>
-            <a href="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block">
+            <p className="text-muted-foreground mb-8">We'll send a confirmation email with directions to our {locationName} showroom.</p>
+            <Link to="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block">
               Back to Home
-            </a>
+            </Link>
           </motion.div>
         </div>
         <Footer />
@@ -126,13 +147,13 @@ const BookDemo = () => {
                 <h3 className="font-display font-bold text-sm uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-primary" /> Select Location
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {["florida", "arizona"].map((loc) => (
+                <div className="grid grid-cols-3 gap-2">
+                  {["florida", "arizona", "atlanta"].map((loc) => (
                     <button key={loc} type="button" onClick={() => updateField("location", loc)}
-                      className={`py-3 rounded-xl text-sm font-bold transition-all duration-300 border ${
+                      className={`py-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 border capitalize ${
                         form.location === loc ? "bg-primary/10 border-primary/40 text-foreground" : "bg-card/30 border-border/20 text-muted-foreground hover:border-border/50"
                       }`}>
-                      {loc === "florida" ? "Florida" : "Arizona"}
+                      {loc}
                     </button>
                   ))}
                 </div>
@@ -237,9 +258,21 @@ const BookDemo = () => {
                       className={`${inputClasses} resize-none`} placeholder="Any special requests..." />
                   </div>
 
-                  <button type="submit" className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none"
+                  >
                     <span className="flex items-center justify-center gap-2">
-                      <Send className="w-4 h-4" /> Confirm Booking
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" /> Confirming Booking...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" /> Confirm Booking
+                        </>
+                      )}
                     </span>
                   </button>
                   <p className="text-center text-[11px] text-muted-foreground">Free · No obligation · Cancel anytime</p>

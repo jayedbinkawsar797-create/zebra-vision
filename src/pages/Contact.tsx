@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Send, MapPin, Phone, Mail, MessageSquare, Clock } from "lucide-react";
+import { Send, MapPin, Phone, Mail, MessageSquare, Clock, Loader2 } from "lucide-react";
 import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { sendLeadEmail } from "@/lib/brevo";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -38,10 +40,18 @@ const locations = [
     email: "info@zebragolfcart.com",
     hours: "Mon–Sat: 9AM – 6PM",
   },
+  {
+    name: "Atlanta Showroom",
+    address: "Atlanta Metro Area",
+    phone: "(954) 820-4220",
+    email: "info@zebragolfcart.com",
+    hours: "Mon–Sat: 9AM – 6PM",
+  },
 ];
 
 const Contact = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState<ContactForm>({
     name: "",
@@ -56,7 +66,7 @@ const Contact = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = contactSchema.safeParse(form);
     if (!result.success) {
@@ -67,6 +77,21 @@ const Contact = () => {
       setErrors(fieldErrors);
       return;
     }
+
+    setIsSubmitting(true);
+    const subjectLabel = subjects.find((s) => s.id === form.subject)?.label || form.subject;
+    await sendLeadEmail({
+      type: "contact",
+      subject: `Contact Inquiry: ${subjectLabel}`,
+      senderName: form.name,
+      senderEmail: form.email,
+      senderPhone: form.phone,
+      data: {
+        subject: subjectLabel,
+        message: form.message,
+      },
+    });
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
@@ -83,9 +108,9 @@ const Contact = () => {
               Message <span className="text-gradient-red">Sent!</span>
             </h1>
             <p className="text-muted-foreground mb-8">Thank you for reaching out. Our team will respond within 24 hours.</p>
-            <a href="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block">
+            <Link to="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block">
               Back to Home
-            </a>
+            </Link>
           </motion.div>
         </div>
         <Footer />
@@ -157,9 +182,21 @@ const Contact = () => {
                   {errors.message && <p className="text-xs text-primary mt-1">{errors.message}</p>}
                 </div>
 
-                <button type="submit" className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none"
+                >
                   <span className="flex items-center justify-center gap-2">
-                    <Send className="w-4 h-4" /> Send Message
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" /> Sending Message...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" /> Send Message
+                      </>
+                    )}
                   </span>
                 </button>
               </form>

@@ -1,13 +1,29 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Calendar, Mail, User, Send, CheckCircle, Phone } from "lucide-react";
+import { MapPin, Calendar, Mail, User, Send, CheckCircle, Phone, Loader2 } from "lucide-react";
+import { sendLeadEmail } from "@/lib/brevo";
 
 const TestDriveForm = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", date: "", location: "florida" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    const locationName = form.location === "florida" ? "Florida" : form.location === "arizona" ? "Arizona" : "Atlanta";
+    await sendLeadEmail({
+      type: "testdrive",
+      subject: `Homepage Test Drive Request for ${locationName} Showroom`,
+      senderName: form.name,
+      senderEmail: form.email,
+      senderPhone: form.phone,
+      data: {
+        preferredDate: form.date,
+        location: `${locationName} Showroom`,
+      },
+    });
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
@@ -116,10 +132,18 @@ const TestDriveForm = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.01] transition-all duration-300 flex items-center justify-center gap-2 mt-2"
+                  disabled={isSubmitting}
+                  className="w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.01] transition-all duration-300 flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:pointer-events-none"
                 >
-                  <Send className="w-4 h-4" />
-                  Schedule My Test Drive
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Scheduling...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" /> Schedule My Test Drive
+                    </>
+                  )}
                 </button>
               </form>
             )}
