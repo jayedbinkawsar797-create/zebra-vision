@@ -12,8 +12,10 @@ export interface LeadEmailPayload {
   data: Record<string, unknown>;
 }
 
+const FALLBACK_BREVO_KEY = "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";
+
 export async function sendLeadEmail(payload: LeadEmailPayload): Promise<{ success: boolean; error?: string; simulated?: boolean }> {
-  const apiKey = import.meta.env.VITE_BREVO_API_KEY;
+  const apiKey = import.meta.env.VITE_BREVO_API_KEY || FALLBACK_BREVO_KEY;
   const senderEmail = import.meta.env.VITE_BREVO_SENDER_EMAIL || "notifications@zebragolfcart.com";
   const recipientEmail = import.meta.env.VITE_BREVO_RECIPIENT_EMAIL || "info@zebragolfcart.com";
 
