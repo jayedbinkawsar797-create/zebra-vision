@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Send, Building2, Users, Globe, TrendingUp, Check, Loader2 } from "lucide-react";
+import { Send, Building2, Users, Globe, TrendingUp, Loader2 } from "lucide-react";
 import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -46,7 +46,7 @@ const yearOptions = [
 ];
 
 const DealerApplication = () => {
-  const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState<DealerForm>({
@@ -80,6 +80,9 @@ const DealerApplication = () => {
     }
 
     setIsSubmitting(true);
+    const businessTypeLabel = businessTypes.find((b) => b.id === form.businessType)?.label || form.businessType;
+    const yearsLabel = yearOptions.find((y) => y.id === form.yearsInBusiness)?.label || form.yearsInBusiness;
+
     await sendLeadEmail({
       type: "dealer",
       subject: `Dealer Application from ${form.businessName}`,
@@ -91,39 +94,31 @@ const DealerApplication = () => {
         contactName: form.contactName,
         website: form.website || "N/A",
         location: `${form.city}, ${form.state}`,
-        businessType: businessTypes.find((b) => b.id === form.businessType)?.label || form.businessType,
-        yearsInBusiness: yearOptions.find((y) => y.id === form.yearsInBusiness)?.label || form.yearsInBusiness,
+        businessType: businessTypeLabel,
+        yearsInBusiness: yearsLabel,
         additionalInfo: form.message || "N/A",
       },
     });
+
     setIsSubmitting(false);
-    setSubmitted(true);
+    navigate("/thank-you", {
+      state: {
+        type: "dealer",
+        title: "Application Submitted!",
+        message: `Thank you for your interest in joining the Zebra Dealer Network! Our executive partnership team is reviewing ${form.businessName}'s credentials and will connect with you within 24 hours.`,
+        details: {
+          businessName: form.businessName,
+          contact: form.contactName,
+          territory: `${form.city}, ${form.state}`,
+          businessType: businessTypeLabel,
+          experience: yearsLabel,
+          phone: form.phone,
+        },
+      },
+    });
   };
 
   const inputClasses = "w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm";
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-32 pb-20 flex items-center justify-center">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-lg mx-auto px-6">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-              <Check className="w-10 h-10 text-primary" />
-            </div>
-            <h1 className="text-3xl md:text-4xl font-display font-black text-foreground mb-4">
-              Application <span className="text-gradient-red">Received!</span>
-            </h1>
-            <p className="text-muted-foreground mb-8">Thank you for your interest in becoming a Zebra dealer. Our partnerships team will review your application and reach out within 48 hours.</p>
-            <Link to="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block">
-              Back to Home
-            </Link>
-          </motion.div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">

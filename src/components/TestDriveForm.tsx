@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Calendar, Mail, User, Send, CheckCircle, Phone, Loader2 } from "lucide-react";
+import { MapPin, Calendar, Mail, User, Send, Phone, Loader2 } from "lucide-react";
 import { sendLeadEmail } from "@/lib/brevo";
 
 const TestDriveForm = () => {
-  const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", date: "", location: "florida" });
 
@@ -24,7 +25,20 @@ const TestDriveForm = () => {
       },
     });
     setIsSubmitting(false);
-    setSubmitted(true);
+    navigate("/thank-you", {
+      state: {
+        type: "testdrive",
+        title: "Test Drive Scheduled!",
+        message: `Thank you, ${form.name}! We have received your test drive request for our ${locationName} Showroom on ${form.date}. Our team will contact you shortly to confirm your slot.`,
+        details: {
+          showroom: `${locationName} Showroom`,
+          preferredDate: form.date,
+          customer: form.name,
+          phone: form.phone,
+          email: form.email,
+        },
+      },
+    });
   };
 
   return (
@@ -54,99 +68,91 @@ const TestDriveForm = () => {
             viewport={{ once: true }}
             className="rounded-3xl border border-border/20 bg-card/20 backdrop-blur-sm p-8 md:p-10"
           >
-            {submitted ? (
-              <div className="text-center py-10">
-                <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h3 className="font-display font-black text-2xl text-foreground mb-2">You're All Set!</h3>
-                <p className="text-muted-foreground">We'll reach out within 24 hours to confirm your test drive.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2 uppercase tracking-widest font-bold">
-                      <User className="w-3.5 h-3.5" /> Full Name
-                    </label>
-                    <input
-                      required
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-card/40 border border-border/20 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2 uppercase tracking-widest font-bold">
-                      <Mail className="w-3.5 h-3.5" /> Email
-                    </label>
-                    <input
-                      required
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-card/40 border border-border/20 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                      placeholder="john@email.com"
-                    />
-                  </div>
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2 uppercase tracking-widest font-bold">
-                    <Phone className="w-3.5 h-3.5" /> Phone Number
+                    <User className="w-3.5 h-3.5" /> Full Name
                   </label>
                   <input
                     required
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-card/40 border border-border/20 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                    placeholder="(555) 123-4567"
+                    placeholder="John Doe"
                   />
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2 uppercase tracking-widest font-bold">
-                      <Calendar className="w-3.5 h-3.5" /> Preferred Date
-                    </label>
-                    <input
-                      required
-                      type="date"
-                      value={form.date}
-                      onChange={(e) => setForm({ ...form, date: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-card/40 border border-border/20 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2 uppercase tracking-widest font-bold">
-                      <MapPin className="w-3.5 h-3.5" /> Location
-                    </label>
-                    <select
-                      value={form.location}
-                      onChange={(e) => setForm({ ...form, location: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-card/40 border border-border/20 text-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                    >
-                      <option value="florida">Florida Showroom</option>
-                      <option value="arizona">Arizona Showroom</option>
-                      <option value="atlanta">Atlanta Showroom</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2 uppercase tracking-widest font-bold">
+                    <Mail className="w-3.5 h-3.5" /> Email
+                  </label>
+                  <input
+                    required
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-card/40 border border-border/20 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                    placeholder="john@email.com"
+                  />
                 </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.01] transition-all duration-300 flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:pointer-events-none"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Scheduling...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" /> Schedule My Test Drive
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2 uppercase tracking-widest font-bold">
+                  <Phone className="w-3.5 h-3.5" /> Phone Number
+                </label>
+                <input
+                  required
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl bg-card/40 border border-border/20 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2 uppercase tracking-widest font-bold">
+                    <Calendar className="w-3.5 h-3.5" /> Preferred Date
+                  </label>
+                  <input
+                    required
+                    type="date"
+                    value={form.date}
+                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-card/40 border border-border/20 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 text-[11px] text-muted-foreground mb-2 uppercase tracking-widest font-bold">
+                    <MapPin className="w-3.5 h-3.5" /> Location
+                  </label>
+                  <select
+                    value={form.location}
+                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-card/40 border border-border/20 text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                  >
+                    <option value="florida">Florida Showroom</option>
+                    <option value="arizona">Arizona Showroom</option>
+                    <option value="atlanta">Atlanta Showroom</option>
+                  </select>
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.01] transition-all duration-300 flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:pointer-events-none"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Scheduling...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" /> Schedule My Test Drive
+                  </>
+                )}
+              </button>
+            </form>
           </motion.div>
         </div>
       </div>

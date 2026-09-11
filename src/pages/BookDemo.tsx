@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CalendarIcon, MapPin, Send, Check, Clock, Car, Loader2 } from "lucide-react";
+import { CalendarIcon, MapPin, Send, Clock, Car, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -37,7 +37,7 @@ const models = [
 ];
 
 const BookDemo = () => {
-  const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState<Omit<BookingForm, "date"> & { date?: Date }>({
@@ -71,6 +71,9 @@ const BookDemo = () => {
 
     setIsSubmitting(true);
     const modelLabel = models.find((m) => m.id === form.model)?.label || form.model;
+    const locationName = form.location === "florida" ? "Florida" : form.location === "arizona" ? "Arizona" : "Atlanta";
+    const dateFormatted = form.date ? format(form.date, "EEEE, MMMM d, yyyy") : "N/A";
+
     await sendLeadEmail({
       type: "demo",
       subject: `Test Drive Booking for ${modelLabel} at ${form.location.toUpperCase()}`,
@@ -79,44 +82,32 @@ const BookDemo = () => {
       senderPhone: form.phone,
       data: {
         model: modelLabel,
-        location: `${form.location.charAt(0).toUpperCase() + form.location.slice(1)} Showroom`,
-        scheduledDate: form.date ? format(form.date, "MMMM d, yyyy") : "N/A",
+        location: `${locationName} Showroom`,
+        scheduledDate: dateFormatted,
         timeSlot: form.timeSlot,
         notes: form.message || "N/A",
       },
     });
+
     setIsSubmitting(false);
-    setSubmitted(true);
+    navigate("/thank-you", {
+      state: {
+        type: "demo",
+        title: "Test Drive Booked!",
+        message: `Your test drive is scheduled for ${dateFormatted} at ${form.timeSlot} at our ${locationName} Showroom. A confirmation notification has been sent to our concierge team.`,
+        details: {
+          showroom: `${locationName} Showroom`,
+          date: dateFormatted,
+          time: form.timeSlot,
+          model: modelLabel,
+          guest: `${form.firstName} ${form.lastName}`,
+          phone: form.phone,
+        },
+      },
+    });
   };
 
   const inputClasses = "w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm";
-
-  if (submitted) {
-    const locationName = form.location === "florida" ? "Florida" : form.location === "arizona" ? "Arizona" : "Atlanta";
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-32 pb-20 flex items-center justify-center">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-lg mx-auto px-6">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-              <Check className="w-10 h-10 text-primary" />
-            </div>
-            <h1 className="text-3xl md:text-4xl font-display font-black text-foreground mb-4">
-              Demo <span className="text-gradient-red">Booked!</span>
-            </h1>
-            <p className="text-muted-foreground mb-2">
-              Your test drive is scheduled for <span className="text-foreground font-bold">{form.date ? format(form.date, "MMMM d, yyyy") : ""}</span> at <span className="text-foreground font-bold">{form.timeSlot}</span>.
-            </p>
-            <p className="text-muted-foreground mb-8">We'll send a confirmation email with directions to our {locationName} showroom.</p>
-            <Link to="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block">
-              Back to Home
-            </Link>
-          </motion.div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">

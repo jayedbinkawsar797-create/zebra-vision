@@ -98,8 +98,25 @@ const Quote = () => {
         message: form.message || "N/A",
       },
     });
+
     setIsSubmitting(false);
-    setSubmitted(true);
+    navigate("/thank-you", {
+      state: {
+        type: "quote",
+        title: "Quote Request Sent!",
+        message: `Thank you, ${form.firstName}! Our sales concierge is reviewing your ${config.model.label} build configuration and will provide an itemized quote and financing breakdown within 24 hours.`,
+        details: {
+          model: `${config.model.label} (${config.model.sub})`,
+          price: config.model.price,
+          bodyColor: config.color.label,
+          seat: config.seat.label,
+          tires: config.tire.label,
+          rims: config.rim.label,
+          payment: form.paymentPreference === "financing" ? "Financing Option" : "Direct Purchase",
+          contact: `${form.firstName} ${form.lastName}`,
+        },
+      },
+    });
   };
 
   if (!config) return null;
@@ -116,38 +133,6 @@ const Quote = () => {
 
   if (config.accessories.length > 0) {
     summaryItems.push({ label: "Accessories", value: config.accessories.includes("lightbar") ? "Bumper Light Bar" : config.accessories.join(", ") });
-  }
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-32 pb-20 flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center max-w-lg mx-auto px-6"
-          >
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-              <Check className="w-10 h-10 text-primary" />
-            </div>
-            <h1 className="text-3xl md:text-4xl font-display font-black text-foreground mb-4">
-              Quote Request <span className="text-gradient-red">Sent!</span>
-            </h1>
-            <p className="text-muted-foreground mb-8">
-              Thank you, {form.firstName}! Our team will review your custom build and get back to you within 24 hours with a detailed quote.
-            </p>
-            <Link
-              to="/"
-              className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block"
-            >
-              Back to Home
-            </Link>
-          </motion.div>
-        </div>
-        <Footer />
-      </div>
-    );
   }
 
   return (

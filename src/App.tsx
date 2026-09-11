@@ -12,6 +12,7 @@ const Quote = lazy(() => import("./pages/Quote.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
 const DealerApplication = lazy(() => import("./pages/DealerApplication.tsx"));
 const BookDemo = lazy(() => import("./pages/BookDemo.tsx"));
+const ThankYou = lazy(() => import("./pages/ThankYou.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/dealer" element={<DealerApplication />} />
             <Route path="/book-demo" element={<BookDemo />} />
+            <Route path="/thank-you" element={<ThankYou />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

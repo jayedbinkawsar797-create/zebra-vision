@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Send, MapPin, Phone, Mail, MessageSquare, Clock, Loader2 } from "lucide-react";
+import { Send, MapPin, Phone, Mail, Clock, Loader2 } from "lucide-react";
 import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -92,31 +92,20 @@ const Contact = () => {
       },
     });
     setIsSubmitting(false);
-    setSubmitted(true);
+    navigate("/thank-you", {
+      state: {
+        type: "contact",
+        title: "Message Received!",
+        message: "Thank you for contacting Zebra Golf Cart. Our customer concierge team has received your inquiry and will respond within 24 hours.",
+        details: {
+          sender: form.name,
+          email: form.email,
+          phone: form.phone,
+          subject: subjectLabel,
+        },
+      },
+    });
   };
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-32 pb-20 flex items-center justify-center">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-lg mx-auto px-6">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-              <MessageSquare className="w-10 h-10 text-primary" />
-            </div>
-            <h1 className="text-3xl md:text-4xl font-display font-black text-foreground mb-4">
-              Message <span className="text-gradient-red">Sent!</span>
-            </h1>
-            <p className="text-muted-foreground mb-8">Thank you for reaching out. Our team will respond within 24 hours.</p>
-            <Link to="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform inline-block">
-              Back to Home
-            </Link>
-          </motion.div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
