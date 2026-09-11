@@ -1,73 +1,74 @@
-# Welcome to your Lovable project
+# Zebra Golf Cart — Luxury Street-Legal Solar-Powered Golf Carts
 
-## Project info
+Official web application and interactive customizer for **Zebra Golf Cart** ([zebragolfcart.com](https://zebragolfcart.com)).
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Interactive 3D/Customizer**: Real-time cart builder for models (Zebra 4 Cruiser, Zebra 6 Grand Cruiser, Safari Sport 4x4, Estate Elite 8).
+- **Automated Lead Management**: Direct Brevo (Sendinblue) transactional email integrations routing inquiries, demo bookings, quote requests, test drives, and dealer applications to `info@zebragolfcart.com`.
+- **Flexible Financing**: Integrated DealerDirect financing CTAs with dynamic loan application pre-population.
+- **Showroom Locators**: Highlighting premier authorized showrooms across Florida, Arizona, and Georgia (Atlanta).
+- **SEO & Performance**: Optimized responsive UI, modern SVG/PNG favicon set, OpenGraph & Twitter cards, and structured JSON-LD schema.
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Framework**: [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- **Bundler & Dev Server**: [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/)
+- **Animations & Carousels**: Framer Motion & Embla Carousel
+- **Routing**: React Router DOM v6
+- **Lead Email System**: Brevo API v3 (`@sendinblue/client` / REST)
+- **Deployment**: Docker + Nginx on Railway / Cloud Containers
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 18+ & npm (or Bun)
+- Brevo API Key (for lead notifications)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Local Development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/jayedbinkawsar797-create/zebra-vision.git
+   cd zebra-vision
+   ```
 
-Follow these steps:
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. **Configure Environment Variables**:
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Set your Brevo API Key:
+   ```env
+   VITE_BREVO_API_KEY=your_brevo_api_key_here
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. **Start Dev Server**:
+   ```bash
+   npm run dev
+   ```
+   Open `http://localhost:8080` in your browser.
 
-# Step 3: Install the necessary dependencies.
-npm i
+5. **Build for Production**:
+   ```bash
+   npm run build
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Production Deployment (Railway / Docker)
 
-**Edit a file directly in GitHub**
+The project includes a multi-stage `Dockerfile` and dynamic Nginx configuration (`nginx.conf.template`) compatible with Railway, Render, Fly.io, or any cloud container platform that dynamically assigns a `$PORT` environment variable.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Port Resolution**: Handled automatically via `/etc/nginx/templates/default.conf.template` and `20-envsubst-on-templates.sh`.
+- **SPA Fallback**: Configured via `try_files $uri $uri/ /index.html;`.
+- **Gzip Compression**: Enabled for high performance delivery.
 
-**Use GitHub Codespaces**
+## License
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Private repository © Zebra Golf Cart. All rights reserved.
