@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { DollarSign, Clock, ShieldCheck, ArrowRight } from "lucide-react";
+import { trackPixelEvent } from "@/lib/metaPixel";
 
 const plans = [
   {
@@ -82,6 +83,13 @@ const FinancingSection = () => {
                 href="https://dealerdirect.apptraker.com/myaccount/loan"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  trackPixelEvent("InitiateCheckout", {
+                    content_name: `Financing Application - ${plan.term}`,
+                    term: plan.term,
+                    rate: plan.rate,
+                  })
+                }
                 className={`inline-flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all duration-300 hover:scale-105 ${
                   plan.highlight
                     ? "bg-primary text-primary-foreground glow-red"

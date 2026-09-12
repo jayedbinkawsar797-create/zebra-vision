@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { trackPixelEvent } from "@/lib/metaPixel";
 
 import cartBlack from "@/assets/cart-black.png";
 import cartBurgundy from "@/assets/cart-burgundy.png";
@@ -96,6 +97,15 @@ const CustomizePage = () => {
       accessories: selectedAccessories,
     };
     sessionStorage.setItem("zebra-config", JSON.stringify(config));
+    trackPixelEvent("CustomizeProduct", {
+      content_name: selectedConfig.label,
+      model: selectedConfig.label,
+      price: selectedConfig.price,
+      color: selectedColor.label,
+      seats: selectedSeat.label,
+      tires: selectedTire.label,
+      rims: selectedRim.label,
+    });
     navigate("/quote");
   };
 

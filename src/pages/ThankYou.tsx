@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2, Phone, Mail, MapPin, ArrowRight, Sparkles, Clock, ShieldCheck, Home } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { trackPixelEvent } from "@/lib/metaPixel";
 
 interface ThankYouState {
   title?: string;
@@ -19,6 +21,20 @@ const ThankYou = () => {
   const message =
     state.message ||
     "We have received your details. A Zebra concierge specialist will review your request and reach out to you within 24 hours.";
+
+  useEffect(() => {
+    trackPixelEvent("Lead", {
+      content_name: state.title || "Lead Submission",
+      content_category: state.type || "general",
+      ...state.details,
+    });
+    if (state.type === "demo" || state.type === "testdrive") {
+      trackPixelEvent("Schedule", {
+        content_name: state.title || "Test Drive Booking",
+        ...state.details,
+      });
+    }
+  }, [state.type, state.title, state.details]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
