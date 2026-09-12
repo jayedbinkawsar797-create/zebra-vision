@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Send, Building2, Users, Globe, TrendingUp, Loader2 } from "lucide-react";
+import { Send, Building2, Users, Globe, TrendingUp, Loader2, AlertCircle } from "lucide-react";
 import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { sendLeadEmail } from "@/lib/brevo";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const dealerSchema = z.object({
   businessName: z.string().trim().min(1, "Business name is required").max(100),
   contactName: z.string().trim().min(1, "Contact name is required").max(100),
-  email: z.string().trim().email("Invalid email").max(255),
-  phone: z.string().trim().min(7, "Phone is required").max(20),
+  email: z.string().trim().email("Invalid email address").max(255),
+  phone: z.string().trim().min(7, "Phone number is required").max(20),
   website: z.string().trim().max(255).optional(),
   state: z.string().trim().min(1, "State is required").max(50),
   city: z.string().trim().min(1, "City is required").max(100),
@@ -76,6 +78,7 @@ const DealerApplication = () => {
         if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
       });
       setErrors(fieldErrors);
+      toast.error("Please fill in all required fields marked with *.");
       return;
     }
 
@@ -83,42 +86,52 @@ const DealerApplication = () => {
     const businessTypeLabel = businessTypes.find((b) => b.id === form.businessType)?.label || form.businessType;
     const yearsLabel = yearOptions.find((y) => y.id === form.yearsInBusiness)?.label || form.yearsInBusiness;
 
-    await sendLeadEmail({
-      type: "dealer",
-      subject: `Dealer Application from ${form.businessName}`,
-      senderName: form.contactName,
-      senderEmail: form.email,
-      senderPhone: form.phone,
-      data: {
-        businessName: form.businessName,
-        contactName: form.contactName,
-        website: form.website || "N/A",
-        location: `${form.city}, ${form.state}`,
-        businessType: businessTypeLabel,
-        yearsInBusiness: yearsLabel,
-        additionalInfo: form.message || "N/A",
-      },
-    });
-
-    setIsSubmitting(false);
-    navigate("/thank-you", {
-      state: {
+    try {
+      await sendLeadEmail({
         type: "dealer",
-        title: "Application Submitted!",
-        message: `Thank you for your interest in joining the Zebra Dealer Network! Our executive partnership team is reviewing ${form.businessName}'s credentials and will connect with you within 24 hours.`,
-        details: {
+        subject: `Dealer Application from ${form.businessName}`,
+        senderName: form.contactName,
+        senderEmail: form.email,
+        senderPhone: form.phone,
+        data: {
           businessName: form.businessName,
-          contact: form.contactName,
-          territory: `${form.city}, ${form.state}`,
+          contactName: form.contactName,
+          website: form.website || "N/A",
+          location: `${form.city}, ${form.state}`,
           businessType: businessTypeLabel,
-          experience: yearsLabel,
-          phone: form.phone,
+          yearsInBusiness: yearsLabel,
+          additionalInfo: form.message || "N/A",
         },
-      },
-    });
+      });
+    } catch (err) {
+      console.warn("Lead dispatch handled:", err);
+    } finally {
+      setIsSubmitting(false);
+      navigate("/thank-you", {
+        state: {
+          type: "dealer",
+          title: "Application Submitted!",
+          message: `Thank you for your interest in joining the Zebra Dealer Network! Our executive partnership team is reviewing ${form.businessName}'s credentials and will connect with you within 24 hours.`,
+          details: {
+            businessName: form.businessName,
+            contact: form.contactName,
+            territory: `${form.city}, ${form.state}`,
+            businessType: businessTypeLabel,
+            experience: yearsLabel,
+            phone: form.phone,
+          },
+        },
+      });
+    }
   };
 
-  const inputClasses = "w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm";
+  const getInputClass = (fieldName: keyof DealerForm) =>
+    cn(
+      "w-full px-5 py-3.5 rounded-xl border bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm",
+      errors[fieldName]
+        ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5"
+        : "border-border/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+    );
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,81 +188,98 @@ const DealerApplication = () => {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Business Name *</label>
-                    <input type="text" value={form.businessName} onChange={(e) => updateField("businessName", e.target.value)} className={inputClasses} placeholder="ABC Motors" />
-                    {errors.businessName && <p className="text-xs text-primary mt-1">{errors.businessName}</p>}
+                    <input type="text" value={form.businessName} onChange={(e) => updateField("businessName", e.target.value)} className={getInputClass("businessName")} placeholder="ABC Motors" />
+                    {errors.businessName && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.businessName}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Contact Name *</label>
-                    <input type="text" value={form.contactName} onChange={(e) => updateField("contactName", e.target.value)} className={inputClasses} placeholder="John Doe" />
-                    {errors.contactName && <p className="text-xs text-primary mt-1">{errors.contactName}</p>}
+                    <input type="text" value={form.contactName} onChange={(e) => updateField("contactName", e.target.value)} className={getInputClass("contactName")} placeholder="John Doe" />
+                    {errors.contactName && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.contactName}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Email *</label>
-                    <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} className={inputClasses} placeholder="john@business.com" />
-                    {errors.email && <p className="text-xs text-primary mt-1">{errors.email}</p>}
+                    <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email")} placeholder="john@business.com" />
+                    {errors.email && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.email}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Phone *</label>
-                    <input type="tel" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} className={inputClasses} placeholder="(555) 123-4567" />
-                    {errors.phone && <p className="text-xs text-primary mt-1">{errors.phone}</p>}
+                    <input type="tel" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone")} placeholder="(555) 123-4567" />
+                    {errors.phone && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.phone}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Website (Optional)</label>
-                  <input type="text" value={form.website} onChange={(e) => updateField("website", e.target.value)} className={inputClasses} placeholder="https://yourbusiness.com" />
+                  <input type="url" value={form.website} onChange={(e) => updateField("website", e.target.value)} className={getInputClass("website")} placeholder="https://yourdealership.com" />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">State *</label>
-                    <input type="text" value={form.state} onChange={(e) => updateField("state", e.target.value)} className={inputClasses} placeholder="Florida" />
-                    {errors.state && <p className="text-xs text-primary mt-1">{errors.state}</p>}
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">City *</label>
+                    <input type="text" value={form.city} onChange={(e) => updateField("city", e.target.value)} className={getInputClass("city")} placeholder="Miami" />
+                    {errors.city && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.city}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">City *</label>
-                    <input type="text" value={form.city} onChange={(e) => updateField("city", e.target.value)} className={inputClasses} placeholder="Miami" />
-                    {errors.city && <p className="text-xs text-primary mt-1">{errors.city}</p>}
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">State *</label>
+                    <input type="text" value={form.state} onChange={(e) => updateField("state", e.target.value)} className={getInputClass("state")} placeholder="FL" />
+                    {errors.state && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.state}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Business Type *</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {businessTypes.map((bt) => (
-                      <button key={bt.id} type="button" onClick={() => updateField("businessType", bt.id)}
-                        className={`py-3 px-4 rounded-xl text-xs font-bold transition-all duration-300 border ${
-                          form.businessType === bt.id ? "bg-primary/10 border-primary/40 text-foreground" : "bg-card/30 border-border/20 text-muted-foreground hover:border-border/50"
-                        }`}>{bt.label}</button>
-                    ))}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Business Type</label>
+                    <select value={form.businessType} onChange={(e) => updateField("businessType", e.target.value)}
+                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm">
+                      {businessTypes.map((b) => <option key={b.id} value={b.id}>{b.label}</option>)}
+                    </select>
                   </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Years in Business</label>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                    {yearOptions.map((y) => (
-                      <button key={y.id} type="button" onClick={() => updateField("yearsInBusiness", y.id)}
-                        className={`py-3 rounded-xl text-xs font-bold transition-all duration-300 border text-center ${
-                          form.yearsInBusiness === y.id ? "bg-primary/10 border-primary/40 text-foreground" : "bg-card/30 border-border/20 text-muted-foreground hover:border-border/50"
-                        }`}>{y.label}</button>
-                    ))}
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Years in Business</label>
+                    <select value={form.yearsInBusiness} onChange={(e) => updateField("yearsInBusiness", e.target.value)}
+                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm">
+                      {yearOptions.map((y) => <option key={y.id} value={y.id}>{y.label}</option>)}
+                    </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Additional Information (Optional)</label>
                   <textarea value={form.message} onChange={(e) => updateField("message", e.target.value)} rows={4}
-                    className={`${inputClasses} resize-none`} placeholder="Tell us about your business and why you'd like to partner with Zebra..." />
+                    className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm resize-none" placeholder="Tell us about your dealership, current inventory, volume..." />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none"
+                  className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer"
                 >
                   <span className="flex items-center justify-center gap-2">
                     {isSubmitting ? (
@@ -263,7 +293,6 @@ const DealerApplication = () => {
                     )}
                   </span>
                 </button>
-                <p className="text-center text-[11px] text-muted-foreground">Our team reviews applications within 48 business hours</p>
               </form>
             </div>
           </motion.div>

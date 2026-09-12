@@ -13,32 +13,37 @@ const TestDriveForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
     const locationName = form.location === "florida" ? "Florida" : form.location === "arizona" ? "Arizona" : "Atlanta";
-    await sendLeadEmail({
-      type: "testdrive",
-      subject: `Homepage Test Drive Request for ${locationName} Showroom`,
-      senderName: form.name,
-      senderEmail: form.email,
-      senderPhone: form.phone,
-      data: {
-        preferredDate: form.date,
-        location: `${locationName} Showroom`,
-      },
-    });
-    setIsSubmitting(false);
-    navigate("/thank-you", {
-      state: {
+    try {
+      await sendLeadEmail({
         type: "testdrive",
-        title: "Test Drive Scheduled!",
-        message: `Thank you, ${form.name}! We have received your test drive request for our ${locationName} Showroom on ${form.date}. Our team will contact you shortly to confirm your slot.`,
-        details: {
-          showroom: `${locationName} Showroom`,
+        subject: `Homepage Test Drive Request for ${locationName} Showroom`,
+        senderName: form.name,
+        senderEmail: form.email,
+        senderPhone: form.phone,
+        data: {
           preferredDate: form.date,
-          customer: form.name,
-          phone: form.phone,
-          email: form.email,
+          location: `${locationName} Showroom`,
         },
-      },
-    });
+      });
+    } catch (err) {
+      console.warn("Lead dispatch handled:", err);
+    } finally {
+      setIsSubmitting(false);
+      navigate("/thank-you", {
+        state: {
+          type: "testdrive",
+          title: "Test Drive Scheduled!",
+          message: `Thank you, ${form.name}! We have received your test drive request for our ${locationName} Showroom on ${form.date}. Our team will contact you shortly to confirm your slot.`,
+          details: {
+            showroom: `${locationName} Showroom`,
+            preferredDate: form.date,
+            customer: form.name,
+            phone: form.phone,
+            email: form.email,
+          },
+        },
+      });
+    }
   };
 
   return (

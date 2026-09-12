@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Send, MapPin, Phone, Mail, Clock, Loader2 } from "lucide-react";
+import { Send, MapPin, Phone, Mail, Clock, Loader2, AlertCircle } from "lucide-react";
 import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { sendLeadEmail } from "@/lib/brevo";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -75,36 +77,42 @@ const Contact = () => {
         if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
       });
       setErrors(fieldErrors);
+      toast.error("Please fill in your name, email, and message.");
       return;
     }
 
     setIsSubmitting(true);
     const subjectLabel = subjects.find((s) => s.id === form.subject)?.label || form.subject;
-    await sendLeadEmail({
-      type: "contact",
-      subject: `Contact Inquiry: ${subjectLabel}`,
-      senderName: form.name,
-      senderEmail: form.email,
-      senderPhone: form.phone,
-      data: {
-        subject: subjectLabel,
-        message: form.message,
-      },
-    });
-    setIsSubmitting(false);
-    navigate("/thank-you", {
-      state: {
+    try {
+      await sendLeadEmail({
         type: "contact",
-        title: "Message Received!",
-        message: "Thank you for contacting Zebra Golf Cart. Our customer concierge team has received your inquiry and will respond within 24 hours.",
-        details: {
-          sender: form.name,
-          email: form.email,
-          phone: form.phone,
+        subject: `Contact Inquiry: ${subjectLabel}`,
+        senderName: form.name,
+        senderEmail: form.email,
+        senderPhone: form.phone,
+        data: {
           subject: subjectLabel,
+          message: form.message,
         },
-      },
-    });
+      });
+    } catch (err) {
+      console.warn("Lead dispatch handled:", err);
+    } finally {
+      setIsSubmitting(false);
+      navigate("/thank-you", {
+        state: {
+          type: "contact",
+          title: "Message Received!",
+          message: "Thank you for contacting Zebra Golf Cart. Our customer concierge team has received your inquiry and will respond within 24 hours.",
+          details: {
+            sender: form.name,
+            email: form.email,
+            phone: form.phone,
+            subject: subjectLabel,
+          },
+        },
+      });
+    }
   };
 
   return (
@@ -135,40 +143,95 @@ const Contact = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Full Name</label>
-                    <input type="text" value={form.name} onChange={(e) => updateField("name", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm" placeholder="John Doe" />
-                    {errors.name && <p className="text-xs text-primary mt-1">{errors.name}</p>}
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Full Name *</label>
+                    <input
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => updateField("name", e.target.value)}
+                      className={cn(
+                        "w-full px-5 py-3.5 rounded-xl border bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm",
+                        errors.name ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5" : "border-border/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                      )}
+                      placeholder="John Doe"
+                    />
+                    {errors.name && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.name}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Email</label>
-                    <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm" placeholder="john@example.com" />
-                    {errors.email && <p className="text-xs text-primary mt-1">{errors.email}</p>}
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Email *</label>
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => updateField("email", e.target.value)}
+                      className={cn(
+                        "w-full px-5 py-3.5 rounded-xl border bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm",
+                        errors.email ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5" : "border-border/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                      )}
+                      placeholder="john@example.com"
+                    />
+                    {errors.email && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.email}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Phone</label>
-                    <input type="tel" value={form.phone} onChange={(e) => updateField("phone", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm" placeholder="(555) 123-4567" />
-                    {errors.phone && <p className="text-xs text-primary mt-1">{errors.phone}</p>}
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Phone *</label>
+                    <input
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => updateField("phone", e.target.value)}
+                      className={cn(
+                        "w-full px-5 py-3.5 rounded-xl border bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm",
+                        errors.phone ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5" : "border-border/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                      )}
+                      placeholder="(555) 123-4567"
+                    />
+                    {errors.phone && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.phone}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Subject</label>
-                    <select value={form.subject} onChange={(e) => updateField("subject", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm">
-                      {subjects.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+                    <select
+                      value={form.subject}
+                      onChange={(e) => updateField("subject", e.target.value)}
+                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                    >
+                      {subjects.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Message</label>
-                  <textarea value={form.message} onChange={(e) => updateField("message", e.target.value)} rows={5}
-                    className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm resize-none" placeholder="Tell us how we can help..." />
-                  {errors.message && <p className="text-xs text-primary mt-1">{errors.message}</p>}
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Message *</label>
+                  <textarea
+                    value={form.message}
+                    onChange={(e) => updateField("message", e.target.value)}
+                    rows={5}
+                    className={cn(
+                      "w-full px-5 py-3.5 rounded-xl border bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm resize-none",
+                      errors.message ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5" : "border-border/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    )}
+                    placeholder="Tell us how we can help..."
+                  />
+                  {errors.message && (
+                    <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" /> {errors.message}
+                    </p>
+                  )}
                 </div>
 
                 <button

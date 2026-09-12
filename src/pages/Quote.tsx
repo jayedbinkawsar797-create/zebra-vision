@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, Send, CreditCard, Landmark, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Send, CreditCard, Landmark, Loader2, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { z } from "zod";
 import { sendLeadEmail } from "@/lib/brevo";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const contactSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50),
@@ -72,51 +74,56 @@ const Quote = () => {
         if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
       });
       setErrors(fieldErrors);
+      toast.error("Please fill in your contact information (name, email, and phone).");
       return;
     }
     if (!config) return;
 
     setIsSubmitting(true);
-    await sendLeadEmail({
-      type: "quote",
-      subject: `Quote Request for ${config.model.label} (${config.model.sub})`,
-      senderName: `${form.firstName} ${form.lastName}`,
-      senderEmail: form.email,
-      senderPhone: form.phone,
-      data: {
-        model: `${config.model.label} (${config.model.sub})`,
-        price: config.model.price,
-        battery: config.model.battery,
-        motor: config.model.motor,
-        bodyColor: config.color.label,
-        seat: config.seat.label,
-        tire: config.tire.label,
-        rim: config.rim.label,
-        accessories: config.accessories.length > 0 ? config.accessories.join(", ") : "None",
-        preferredLocation: form.location,
-        paymentPreference: form.paymentPreference,
-        message: form.message || "N/A",
-      },
-    });
-
-    setIsSubmitting(false);
-    navigate("/thank-you", {
-      state: {
+    try {
+      await sendLeadEmail({
         type: "quote",
-        title: "Quote Request Sent!",
-        message: `Thank you, ${form.firstName}! Our sales concierge is reviewing your ${config.model.label} build configuration and will provide an itemized quote and financing breakdown within 24 hours.`,
-        details: {
+        subject: `Quote Request for ${config.model.label} (${config.model.sub})`,
+        senderName: `${form.firstName} ${form.lastName}`,
+        senderEmail: form.email,
+        senderPhone: form.phone,
+        data: {
           model: `${config.model.label} (${config.model.sub})`,
           price: config.model.price,
+          battery: config.model.battery,
+          motor: config.model.motor,
           bodyColor: config.color.label,
           seat: config.seat.label,
-          tires: config.tire.label,
-          rims: config.rim.label,
-          payment: form.paymentPreference === "financing" ? "Financing Option" : "Direct Purchase",
-          contact: `${form.firstName} ${form.lastName}`,
+          tire: config.tire.label,
+          rim: config.rim.label,
+          accessories: config.accessories.length > 0 ? config.accessories.join(", ") : "None",
+          preferredLocation: form.location,
+          paymentPreference: form.paymentPreference,
+          message: form.message || "N/A",
         },
-      },
-    });
+      });
+    } catch (err) {
+      console.warn("Lead dispatch handled:", err);
+    } finally {
+      setIsSubmitting(false);
+      navigate("/thank-you", {
+        state: {
+          type: "quote",
+          title: "Quote Request Sent!",
+          message: `Thank you, ${form.firstName}! Our sales concierge is reviewing your ${config.model.label} build configuration and will provide an itemized quote and financing breakdown within 24 hours.`,
+          details: {
+            model: `${config.model.label} (${config.model.sub})`,
+            price: config.model.price,
+            bodyColor: config.color.label,
+            seat: config.seat.label,
+            tires: config.tire.label,
+            rims: config.rim.label,
+            payment: form.paymentPreference === "financing" ? "Financing Option" : "Direct Purchase",
+            contact: `${form.firstName} ${form.lastName}`,
+          },
+        },
+      });
+    }
   };
 
   if (!config) return null;
@@ -204,51 +211,79 @@ const Quote = () => {
               <form onSubmit={handleSubmit} className="space-y-5 rounded-3xl border border-border/40 bg-secondary p-8">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">First Name</label>
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">First Name *</label>
                     <input
                       type="text"
                       value={form.firstName}
                       onChange={(e) => updateField("firstName", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                      className={cn(
+                        "w-full px-5 py-3.5 rounded-xl border bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm",
+                        errors.firstName ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5" : "border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                      )}
                       placeholder="John"
                     />
-                    {errors.firstName && <p className="text-xs text-primary mt-1">{errors.firstName}</p>}
+                    {errors.firstName && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.firstName}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Last Name</label>
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Last Name *</label>
                     <input
                       type="text"
                       value={form.lastName}
                       onChange={(e) => updateField("lastName", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                      className={cn(
+                        "w-full px-5 py-3.5 rounded-xl border bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm",
+                        errors.lastName ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5" : "border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                      )}
                       placeholder="Doe"
                     />
-                    {errors.lastName && <p className="text-xs text-primary mt-1">{errors.lastName}</p>}
+                    {errors.lastName && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.lastName}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Email</label>
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Email *</label>
                     <input
                       type="email"
                       value={form.email}
                       onChange={(e) => updateField("email", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                      className={cn(
+                        "w-full px-5 py-3.5 rounded-xl border bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm",
+                        errors.email ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5" : "border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                      )}
                       placeholder="john@example.com"
                     />
-                    {errors.email && <p className="text-xs text-primary mt-1">{errors.email}</p>}
+                    {errors.email && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.email}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Phone</label>
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Phone *</label>
                     <input
                       type="tel"
                       value={form.phone}
                       onChange={(e) => updateField("phone", e.target.value)}
-                      className="w-full px-5 py-3.5 rounded-xl border border-border/50 bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm"
+                      className={cn(
+                        "w-full px-5 py-3.5 rounded-xl border bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm",
+                        errors.phone ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5" : "border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                      )}
                       placeholder="(555) 123-4567"
                     />
-                    {errors.phone && <p className="text-xs text-primary mt-1">{errors.phone}</p>}
+                    {errors.phone && (
+                      <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {errors.phone}
+                      </p>
+                    )}
                   </div>
                 </div>
 

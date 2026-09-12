@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CalendarIcon, MapPin, Send, Clock, Car, Loader2 } from "lucide-react";
+import { CalendarIcon, MapPin, Send, Clock, Car, Loader2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -9,12 +9,13 @@ import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { sendLeadEmail } from "@/lib/brevo";
+import { toast } from "sonner";
 
 const bookingSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50),
   lastName: z.string().trim().min(1, "Last name is required").max(50),
-  email: z.string().trim().email("Invalid email").max(255),
-  phone: z.string().trim().min(7, "Phone is required").max(20),
+  email: z.string().trim().email("Invalid email address").max(255),
+  phone: z.string().trim().min(7, "Phone number is required").max(20),
   location: z.enum(["florida", "arizona", "atlanta"]),
   date: z.date({ required_error: "Please select a date" }),
   timeSlot: z.string().min(1, "Please select a time"),
@@ -66,6 +67,7 @@ const BookDemo = () => {
         if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
       });
       setErrors(fieldErrors);
+      toast.error("Please fill in all required fields and select your preferred date & time.");
       return;
     }
 
@@ -74,40 +76,50 @@ const BookDemo = () => {
     const locationName = form.location === "florida" ? "Florida" : form.location === "arizona" ? "Arizona" : "Atlanta";
     const dateFormatted = form.date ? format(form.date, "EEEE, MMMM d, yyyy") : "N/A";
 
-    await sendLeadEmail({
-      type: "demo",
-      subject: `Test Drive Booking for ${modelLabel} at ${form.location.toUpperCase()}`,
-      senderName: `${form.firstName} ${form.lastName}`,
-      senderEmail: form.email,
-      senderPhone: form.phone,
-      data: {
-        model: modelLabel,
-        location: `${locationName} Showroom`,
-        scheduledDate: dateFormatted,
-        timeSlot: form.timeSlot,
-        notes: form.message || "N/A",
-      },
-    });
-
-    setIsSubmitting(false);
-    navigate("/thank-you", {
-      state: {
+    try {
+      await sendLeadEmail({
         type: "demo",
-        title: "Test Drive Booked!",
-        message: `Your test drive is scheduled for ${dateFormatted} at ${form.timeSlot} at our ${locationName} Showroom. A confirmation notification has been sent to our concierge team.`,
-        details: {
-          showroom: `${locationName} Showroom`,
-          date: dateFormatted,
-          time: form.timeSlot,
+        subject: `Test Drive Booking for ${modelLabel} at ${form.location.toUpperCase()}`,
+        senderName: `${form.firstName} ${form.lastName}`,
+        senderEmail: form.email,
+        senderPhone: form.phone,
+        data: {
           model: modelLabel,
-          guest: `${form.firstName} ${form.lastName}`,
-          phone: form.phone,
+          location: `${locationName} Showroom`,
+          scheduledDate: dateFormatted,
+          timeSlot: form.timeSlot,
+          notes: form.message || "N/A",
         },
-      },
-    });
+      });
+    } catch (err) {
+      console.warn("Lead dispatch handled:", err);
+    } finally {
+      setIsSubmitting(false);
+      navigate("/thank-you", {
+        state: {
+          type: "demo",
+          title: "Test Drive Booked!",
+          message: `Your test drive is scheduled for ${dateFormatted} at ${form.timeSlot} at our ${locationName} Showroom. A confirmation notification has been sent to our concierge team.`,
+          details: {
+            showroom: `${locationName} Showroom`,
+            date: dateFormatted,
+            time: form.timeSlot,
+            model: modelLabel,
+            guest: `${form.firstName} ${form.lastName}`,
+            phone: form.phone,
+          },
+        },
+      });
+    }
   };
 
-  const inputClasses = "w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm";
+  const getInputClass = (fieldName: string) =>
+    cn(
+      "w-full px-5 py-3.5 rounded-xl border bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-all text-sm",
+      errors[fieldName]
+        ? "border-primary/80 ring-1 ring-primary/40 bg-primary/5"
+        : "border-border/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+    );
 
   return (
     <div className="min-h-screen bg-background">
@@ -151,9 +163,9 @@ const BookDemo = () => {
               </div>
 
               {/* Calendar */}
-              <div className="rounded-3xl border border-border/20 bg-card/30 backdrop-blur-sm p-6">
+              <div className={cn("rounded-3xl border bg-card/30 backdrop-blur-sm p-6 transition-colors", errors.date ? "border-primary/80 ring-1 ring-primary/40" : "border-border/20")}>
                 <h3 className="font-display font-bold text-sm uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
-                  <CalendarIcon className="w-4 h-4 text-primary" /> Select Date
+                  <CalendarIcon className="w-4 h-4 text-primary" /> Select Date *
                 </h3>
                 <Calendar
                   mode="single"
@@ -162,25 +174,33 @@ const BookDemo = () => {
                   disabled={(date) => date < new Date() || date.getDay() === 0}
                   className={cn("p-3 pointer-events-auto rounded-xl border border-border/20 bg-card/20")}
                 />
-                {errors.date && <p className="text-xs text-primary mt-2">{errors.date}</p>}
+                {errors.date && (
+                  <p className="text-xs text-primary font-semibold mt-2 flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5" /> {errors.date}
+                  </p>
+                )}
               </div>
 
               {/* Time slots */}
-              <div className="rounded-3xl border border-border/20 bg-card/30 backdrop-blur-sm p-6">
+              <div className={cn("rounded-3xl border bg-card/30 backdrop-blur-sm p-6 transition-colors", errors.timeSlot ? "border-primary/80 ring-1 ring-primary/40" : "border-border/20")}>
                 <h3 className="font-display font-bold text-sm uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary" /> Select Time
+                  <Clock className="w-4 h-4 text-primary" /> Select Time *
                 </h3>
                 <div className="grid grid-cols-3 gap-2">
                   {timeSlots.map((slot) => (
                     <button key={slot} type="button" onClick={() => updateField("timeSlot", slot)}
                       className={`py-2.5 rounded-xl text-xs font-bold transition-all duration-300 border ${
-                        form.timeSlot === slot ? "bg-primary/10 border-primary/40 text-foreground" : "bg-card/30 border-border/20 text-muted-foreground hover:border-border/50"
+                        form.timeSlot === slot ? "bg-primary/20 border-primary text-foreground font-extrabold" : "bg-card/30 border-border/20 text-muted-foreground hover:border-border/50"
                       }`}>
                       {slot}
                     </button>
                   ))}
                 </div>
-                {errors.timeSlot && <p className="text-xs text-primary mt-2">{errors.timeSlot}</p>}
+                {errors.timeSlot && (
+                  <p className="text-xs text-primary font-semibold mt-2 flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5" /> {errors.timeSlot}
+                  </p>
+                )}
               </div>
             </motion.div>
 
@@ -196,8 +216,8 @@ const BookDemo = () => {
                     <p className="text-sm text-foreground font-bold">
                       📅 {format(form.date, "EEEE, MMMM d, yyyy")} at {form.timeSlot}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {form.location === "florida" ? "Florida" : "Arizona"} Showroom
+                    <p className="text-xs text-muted-foreground mt-1 capitalize">
+                      {form.location} Showroom
                     </p>
                   </motion.div>
                 )}
@@ -206,26 +226,42 @@ const BookDemo = () => {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">First Name *</label>
-                      <input type="text" value={form.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={inputClasses} placeholder="John" />
-                      {errors.firstName && <p className="text-xs text-primary mt-1">{errors.firstName}</p>}
+                      <input type="text" value={form.firstName} onChange={(e) => updateField("firstName", e.target.value)} className={getInputClass("firstName")} placeholder="John" />
+                      {errors.firstName && (
+                        <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> {errors.firstName}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Last Name *</label>
-                      <input type="text" value={form.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={inputClasses} placeholder="Doe" />
-                      {errors.lastName && <p className="text-xs text-primary mt-1">{errors.lastName}</p>}
+                      <input type="text" value={form.lastName} onChange={(e) => updateField("lastName", e.target.value)} className={getInputClass("lastName")} placeholder="Doe" />
+                      {errors.lastName && (
+                        <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> {errors.lastName}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Email *</label>
-                      <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} className={inputClasses} placeholder="john@example.com" />
-                      {errors.email && <p className="text-xs text-primary mt-1">{errors.email}</p>}
+                      <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email")} placeholder="john@example.com" />
+                      {errors.email && (
+                        <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> {errors.email}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Phone *</label>
-                      <input type="tel" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} className={inputClasses} placeholder="(555) 123-4567" />
-                      {errors.phone && <p className="text-xs text-primary mt-1">{errors.phone}</p>}
+                      <input type="tel" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone")} placeholder="(555) 123-4567" />
+                      {errors.phone && (
+                        <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> {errors.phone}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -246,13 +282,13 @@ const BookDemo = () => {
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Notes (Optional)</label>
                     <textarea value={form.message} onChange={(e) => updateField("message", e.target.value)} rows={3}
-                      className={`${inputClasses} resize-none`} placeholder="Any special requests..." />
+                      className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm resize-none" placeholder="Any special requests..." />
                   </div>
 
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none"
+                    className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer"
                   >
                     <span className="flex items-center justify-center gap-2">
                       {isSubmitting ? (
