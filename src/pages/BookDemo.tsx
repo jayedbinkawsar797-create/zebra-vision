@@ -1,3 +1,4 @@
+import LeadConsent from "@/components/LeadConsent";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -16,7 +17,7 @@ const bookingSchema = z.object({
   lastName: z.string().trim().min(1, "Last name is required").max(50),
   email: z.string().trim().email("Invalid email address").max(255),
   phone: z.string().trim().min(7, "Phone number is required").max(20),
-  location: z.enum(["florida", "arizona", "atlanta"]),
+  location: z.enum(["florida"]),
   date: z.date({ required_error: "Please select a date" }),
   timeSlot: z.string().min(1, "Please select a time"),
   model: z.enum(["any", "breeze-4l", "terrain-6", "terrain-6-pro"]),
@@ -58,7 +59,7 @@ const BookDemo = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result = bookingSchema.safeParse(form);
     if (!result.success) {
@@ -73,7 +74,7 @@ const BookDemo = () => {
 
     setIsSubmitting(true);
     const modelLabel = models.find((m) => m.id === form.model)?.label || form.model;
-    const locationName = form.location === "florida" ? "Florida" : form.location === "arizona" ? "Arizona" : "Atlanta";
+    const locationName = "Plantation, Florida";
     const dateFormatted = form.date ? format(form.date, "EEEE, MMMM d, yyyy") : "N/A";
 
     try {
@@ -90,16 +91,12 @@ const BookDemo = () => {
           timeSlot: form.timeSlot,
           notes: form.message || "N/A",
         },
-      });
-    } catch (err) {
-      console.warn("Lead dispatch handled:", err);
-    } finally {
-      setIsSubmitting(false);
+      }, e.currentTarget);
       navigate("/thank-you", {
         state: {
           type: "demo",
-          title: "Test Drive Booked!",
-          message: `Your test drive is scheduled for ${dateFormatted} at ${form.timeSlot} at our ${locationName} Showroom. A confirmation notification has been sent to our concierge team.`,
+          title: "Test Drive Request Received!",
+          message: `We received your request for ${dateFormatted} at ${form.timeSlot}. Our team will contact you to confirm the location and appointment.`,
           details: {
             showroom: `${locationName} Showroom`,
             date: dateFormatted,
@@ -110,6 +107,10 @@ const BookDemo = () => {
           },
         },
       });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Your request was not saved. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -151,7 +152,7 @@ const BookDemo = () => {
                   <MapPin className="w-4 h-4 text-primary" /> Select Location
                 </h3>
                 <div className="grid grid-cols-3 gap-2">
-                  {["florida", "arizona", "atlanta"].map((loc) => (
+                  {["florida"].map((loc) => (
                     <button key={loc} type="button" onClick={() => updateField("location", loc)}
                       className={`py-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 border capitalize ${
                         form.location === loc ? "bg-primary/10 border-primary/40 text-foreground" : "bg-card/30 border-border/20 text-muted-foreground hover:border-border/50"
@@ -271,7 +272,8 @@ const BookDemo = () => {
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                       {models.map((m) => (
-                        <button key={m.id} type="button" onClick={() => updateField("model", m.id)}
+
+                <button key={m.id} type="button" onClick={() => updateField("model", m.id)}
                           className={`py-3 px-4 rounded-xl text-xs font-bold transition-all duration-300 border ${
                             form.model === m.id ? "bg-primary/10 border-primary/40 text-foreground" : "bg-card/30 border-border/20 text-muted-foreground hover:border-border/50"
                           }`}>{m.label}</button>
@@ -285,7 +287,8 @@ const BookDemo = () => {
                       className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm resize-none" placeholder="Any special requests..." />
                   </div>
 
-                  <button
+                  <LeadConsent />
+                <button
                     type="submit"
                     disabled={isSubmitting}
                     className="group w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.02] transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none cursor-pointer"

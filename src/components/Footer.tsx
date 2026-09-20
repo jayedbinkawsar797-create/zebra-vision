@@ -21,6 +21,7 @@ const Footer = () => (
               { label: "Book a Demo", href: "/book-demo" },
               { label: "Dealer Application", href: "/dealer" },
               { label: "Contact Us", href: "/contact" },
+              { label: "Privacy Policy", href: "/privacy" },
             ].map((l) => (
               <Link key={l.label} to={l.href} className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {l.label}
@@ -42,7 +43,7 @@ const Footer = () => (
         <div>
           <h4 className="font-display font-bold text-foreground mb-4 text-xs uppercase tracking-widest">Locations</h4>
           <div className="space-y-3">
-            {["Florida Showroom", "Arizona Showroom", "Atlanta Showroom"].map((loc) => (
+            {["Plantation, Florida", "Delivery by arrangement"].map((loc) => (
               <div key={loc} className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0" /> {loc}
               </div>
@@ -51,6 +52,7 @@ const Footer = () => (
         </div>
       </div>
       <div className="border-t border-border/20 mt-12 pt-8 text-center text-xs text-muted-foreground">
+        <button className="underline mb-4" onClick={() => window.dispatchEvent(new Event("zebra-open-privacy"))}>Privacy choices</button><br/>
         © {new Date().getFullYear()} Zebra Golf Cart. All rights reserved. Street Legal LSV vehicles with VIN.
       </div>
     </div>

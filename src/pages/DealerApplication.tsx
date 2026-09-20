@@ -1,3 +1,4 @@
+import LeadConsent from "@/components/LeadConsent";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -25,10 +26,10 @@ const dealerSchema = z.object({
 type DealerForm = z.infer<typeof dealerSchema>;
 
 const benefits = [
-  { icon: TrendingUp, title: "High Margins", desc: "Industry-leading dealer margins on every unit sold" },
-  { icon: Building2, title: "Territory Protection", desc: "Exclusive territory rights for qualified dealers" },
-  { icon: Users, title: "Marketing Support", desc: "Co-op advertising, leads, and digital assets provided" },
-  { icon: Globe, title: "Growing Demand", desc: "LSV market growing 15%+ annually across the USA" },
+  { icon: TrendingUp, title: "Dealer Pricing", desc: "Discuss current wholesale pricing and model availability" },
+  { icon: Building2, title: "Market Review", desc: "Tell us about your location and the customers you serve" },
+  { icon: Users, title: "Marketing Support", desc: "Ask about available product materials and sales support" },
+  { icon: Globe, title: "Business Options", desc: "Explore carts for retail, rental, resorts, and communities" },
 ];
 
 const businessTypes = [
@@ -69,7 +70,7 @@ const DealerApplication = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result = dealerSchema.safeParse(form);
     if (!result.success) {
@@ -102,16 +103,12 @@ const DealerApplication = () => {
           yearsInBusiness: yearsLabel,
           additionalInfo: form.message || "N/A",
         },
-      });
-    } catch (err) {
-      console.warn("Lead dispatch handled:", err);
-    } finally {
-      setIsSubmitting(false);
+      }, e.currentTarget);
       navigate("/thank-you", {
         state: {
           type: "dealer",
           title: "Application Submitted!",
-          message: `Thank you for your interest in joining the Zebra Dealer Network! Our executive partnership team is reviewing ${form.businessName}'s credentials and will connect with you within 24 hours.`,
+          message: `Thank you for your interest in joining the Zebra Dealer Network! Our executive partnership team is reviewing ${form.businessName}'s credentials and will connect with you to discuss next steps.`,
           details: {
             businessName: form.businessName,
             contact: form.contactName,
@@ -122,6 +119,10 @@ const DealerApplication = () => {
           },
         },
       });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Your request was not saved. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -146,8 +147,7 @@ const DealerApplication = () => {
               Become a <span className="text-gradient-red">Zebra Dealer</span>
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Join the fastest-growing luxury LSV brand in America. Exclusive territories, 
-              premium margins, and a product that sells itself.
+              Apply to represent Zebra in your market. Tell us about your business and our team will discuss the next steps.
             </p>
           </motion.div>
         </div>
@@ -276,6 +276,8 @@ const DealerApplication = () => {
                     className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm resize-none" placeholder="Tell us about your dealership, current inventory, volume..." />
                 </div>
 
+
+                <LeadConsent />
                 <button
                   type="submit"
                   disabled={isSubmitting}

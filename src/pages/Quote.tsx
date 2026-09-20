@@ -1,3 +1,4 @@
+import LeadConsent from "@/components/LeadConsent";
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -14,7 +15,7 @@ const contactSchema = z.object({
   lastName: z.string().trim().min(1, "Last name is required").max(50),
   email: z.string().trim().email("Invalid email address").max(255),
   phone: z.string().trim().min(7, "Phone number is required").max(20),
-  location: z.enum(["florida", "arizona", "atlanta", "other"]),
+  location: z.enum(["florida", "other"]),
   paymentPreference: z.enum(["financing", "direct"]),
   message: z.string().trim().max(500).optional(),
 });
@@ -69,7 +70,7 @@ const Quote = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result = contactSchema.safeParse(form);
     if (!result.success) {
@@ -105,16 +106,12 @@ const Quote = () => {
           paymentPreference: form.paymentPreference,
           message: form.message || "N/A",
         },
-      });
-    } catch (err) {
-      console.warn("Lead dispatch handled:", err);
-    } finally {
-      setIsSubmitting(false);
+      }, e.currentTarget);
       navigate("/thank-you", {
         state: {
           type: "quote",
           title: "Quote Request Sent!",
-          message: `Thank you, ${form.firstName}! Our sales concierge is reviewing your ${config.model.label} build configuration and will provide an itemized quote and financing breakdown within 24 hours.`,
+          message: `Thank you, ${form.firstName}! Our sales concierge is reviewing your ${config.model.label} build configuration and will provide an itemized quote and financing breakdown after reviewing your request.`,
           details: {
             model: `${config.model.label} (${config.model.sub})`,
             price: config.model.price,
@@ -127,6 +124,10 @@ const Quote = () => {
           },
         },
       });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Your request was not saved. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -292,15 +293,14 @@ const Quote = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Preferred Location</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Pickup or delivery area</label>
+                  <div className="grid grid-cols-2 gap-3">
                     {[
-                      { id: "florida", label: "Florida" },
-                      { id: "arizona", label: "Arizona" },
-                      { id: "atlanta", label: "Atlanta" },
-                      { id: "other", label: "Other" },
+                      { id: "florida", label: "Plantation, FL" },
+                      { id: "other", label: "Delivery elsewhere" },
                     ].map((loc) => (
-                      <button
+
+                <button
                         key={loc.id}
                         type="button"
                         onClick={() => updateField("location", loc.id)}
@@ -336,7 +336,7 @@ const Quote = () => {
                       </div>
                       <div className="text-left">
                         <span className="text-sm font-bold text-foreground block">Financing</span>
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Monthly payments from 0% APR</span>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Ask about current lender terms</span>
                       </div>
                     </button>
                     <button
@@ -361,7 +361,7 @@ const Quote = () => {
                   </div>
                   {form.paymentPreference === "financing" && (
                     <div className="mt-3 p-3.5 rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Looking for instant financing pre-approval?</span>
+                      <span className="text-muted-foreground">Financing is subject to lender approval.</span>
                       <a
                         href="https://dealerdirect.apptraker.com/myaccount/loan"
                         target="_blank"
@@ -385,6 +385,7 @@ const Quote = () => {
                   />
                 </div>
 
+                <LeadConsent />
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -407,7 +408,7 @@ const Quote = () => {
                 </button>
 
                 <p className="text-center text-[11px] text-muted-foreground">
-                  No obligation · Our team responds within 24 hours
+                  No obligation · Our team responds after reviewing your request
                 </p>
               </form>
             </motion.div>
