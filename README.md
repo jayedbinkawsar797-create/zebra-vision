@@ -1,74 +1,35 @@
-# Zebra Golf Cart — Luxury Street-Legal Solar-Powered Golf Carts
+# Zebra Golf Cart
 
-Official web application and interactive customizer for **Zebra Golf Cart** ([zebragolfcart.com](https://zebragolfcart.com)).
+Website and private lead manager for https://zebragolfcart.com.
 
-## Features
+## Application
 
-- **Interactive 3D/Customizer**: Real-time cart builder for models (Zebra 4 Cruiser, Zebra 6 Grand Cruiser, Safari Sport 4x4, Estate Elite 8).
-- **Automated Lead Management**: Direct Brevo (Sendinblue) transactional email integrations routing inquiries, demo bookings, quote requests, test drives, and dealer applications to `info@zebragolfcart.com`.
-- **Flexible Financing**: Integrated DealerDirect financing CTAs with dynamic loan application pre-population.
-- **Showroom Locators**: Highlighting premier authorized showrooms across Florida, Arizona, and Georgia (Atlanta).
-- **SEO & Performance**: Optimized responsive UI, modern SVG/PNG favicon set, OpenGraph & Twitter cards, and structured JSON-LD schema.
+React and Vite build the public website. The Node server in `server/index.mjs` serves the built website and handles inquiries, staff sign-in, and lead status changes. PostgreSQL stores leads, sessions, status history, and the delivery outbox.
 
-## Tech Stack
+## Configuration
 
-- **Framework**: [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Bundler & Dev Server**: [Vite](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/)
-- **Animations & Carousels**: Framer Motion & Embla Carousel
-- **Routing**: React Router DOM v6
-- **Lead Email System**: Brevo API v3 (`@sendinblue/client` / REST)
-- **Deployment**: Docker + Nginx on Railway / Cloud Containers
+Use `.env.example` as the configuration reference. Store production secrets only in Railway service variables for `fulfilling-success` → `production` → `zebra-vision`.
 
-## Getting Started
+Required email variables:
 
-### Prerequisites
+- `BREVO_API_KEY`: a valid Brevo API key, available only to the server.
+- `BREVO_SENDER_EMAIL`: a verified sender; defaults to `notifications@zebragolfcart.com`.
+- `BREVO_RECIPIENT_EMAIL`: the staff notification and sign-in recipient; defaults to `info@zebragolfcart.com`.
 
-- Node.js 18+ & npm (or Bun)
-- Brevo API Key (for lead notifications)
+Never prefix secrets with `VITE_`, commit real credentials, or print them in logs. Remove obsolete frontend email variables when migrating. Rotate any previously exposed key at Brevo after deploying and verifying the replacement.
 
-### Local Development
+Other server settings include `DATABASE_URL`, `SITE_ORIGIN`, `NODE_ENV`, `PORT`, `META_DATASET_ID`, `META_ACCESS_TOKEN`, and `META_GRAPH_VERSION`. Use `META_TEST_EVENT_CODE` only for controlled testing and remove it before real traffic.
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/jayedbinkawsar797-create/zebra-vision.git
-   cd zebra-vision
-   ```
+## Development and checks
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+Install dependencies with `npm ci`. Run the API server with `npm start` and Vite with `npm run dev`; the Vite configuration proxies `/api` to port 8080. Supply the server environment securely. Run `npm run build` for production assets.
 
-3. **Configure Environment Variables**:
-   Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-   Set your Brevo API Key:
-   ```env
-   VITE_BREVO_API_KEY=your_brevo_api_key_here
-   ```
+Available checks: `npm test`, `npm run test:server`, `npm run test:integration`, and `npm run lint`. Database-dependent checks require the appropriate test database configuration.
 
-4. **Start Dev Server**:
-   ```bash
-   npm run dev
-   ```
-   Open `http://localhost:8080` in your browser.
+## Deployment and verification
 
-5. **Build for Production**:
-   ```bash
-   npm run build
-   ```
+Railway deploys `zzorganization/zebra-vision` branch `main`. The Node server serves `dist` and `/api/health` reports readiness after database migration.
 
-## Production Deployment (Railway / Docker)
+After an email configuration change, verify a clearly labeled inquiry is saved, confirm a Delivered event in Brevo's transactional logs, and test staff sign-in at `/leads`. An API acceptance response or the outbox's `sent` state alone does not prove delivery to the recipient's mail server.
 
-The project includes a multi-stage `Dockerfile` and dynamic Nginx configuration (`nginx.conf.template`) compatible with Railway, Render, Fly.io, or any cloud container platform that dynamically assigns a `$PORT` environment variable.
-
-- **Port Resolution**: Handled automatically via `/etc/nginx/templates/default.conf.template` and `20-envsubst-on-templates.sh`.
-- **SPA Fallback**: Configured via `try_files $uri $uri/ /index.html;`.
-- **Gzip Compression**: Enabled for high performance delivery.
-
-## License
-
-Private repository © Zebra Golf Cart. All rights reserved.
+Meta browser/server events respect advertising consent and use shared event IDs for deduplication. Qualified and disqualified outcomes are sent through the Conversions API. These events are measurement signals; their acceptance does not establish creation or status synchronization of a customer record in Meta Leads Center. The consent-filtered CSV export remains a manual transfer unless a supported record integration is separately implemented and verified.
