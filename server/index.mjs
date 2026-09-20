@@ -5,7 +5,7 @@ import { createReadStream } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { pool, migrate } from './db.mjs';
-import { leadSchema, hash, eventForType, csvCell } from './lead-core.mjs';
+import { leadSchema, hash, eventForType, csvCell, normalizedPhone } from './lead-core.mjs';
 import { deliverPending, mailConfig, sendMail } from './delivery.mjs';
 
 const port = Number(process.env.PORT || 8080);
@@ -125,8 +125,8 @@ export const server = http.createServer(async (req,res) => {
           return json(res,200,{leads:leads.rows,delivery:queue.rows,metaConfigured:!!(process.env.META_ACCESS_TOKEN&&process.env.META_DATASET_ID),emailConfigured:!!mailConfig().key});
         }
         if(pathname==='/api/admin/export' && req.method==='GET') {
-          const leads=await pool.query('SELECT id,payload,status,created_at FROM zebra_web_leads ORDER BY created_at DESC LIMIT 10000');
-          const rows=[['First Name','Last Name','Phone','Email','Company','Notes'],...leads.rows.map(l=>{const [first,...last]=l.payload.senderName.split(/\s+/);return [first,last.join(' '),l.payload.senderPhone,l.payload.senderEmail,l.payload.data.businessName||'',`Website ${l.payload.type}; status: ${l.status}; ${l.id}; ${new Date(l.created_at).toISOString()}`];})];
+          const leads=await pool.query(`SELECT id,payload,status,created_at FROM zebra_web_leads WHERE payload->>'marketingConsent'='true' AND payload->>'type' IN ('quote','demo','testdrive') ORDER BY created_at DESC LIMIT 10000`);
+          const rows=[['First Name','Last Name','Phone','Email','Company','Notes'],...leads.rows.map(l=>{const [first,...last]=l.payload.senderName.split(/\s+/);return [first,last.join(' '),normalizedPhone(l.payload.senderPhone),l.payload.senderEmail,l.payload.data.businessName||'',`Website ${l.payload.type}; status: ${l.status}; ${l.id}; ${new Date(l.created_at).toISOString()}`];})];
           res.writeHead(200,{'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="zebra-website-leads.csv"','Cache-Control':'no-store'});
           return res.end('\uFEFF'+rows.map(row=>row.map(csvCell).join(',')).join('\r\n'));
         }

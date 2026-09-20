@@ -30,7 +30,7 @@ try {
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM zebra_lead_outbox WHERE lead_id=$1',[lead.submissionId])).rows[0].n,2);
  });
  await test('declined advertising consent stores no advertising identifiers or Meta job',async()=>{
-  const lead={...makeLead(),marketingConsent:false,attribution:{path:'/',fbp:'fb.1.1726800000000.1234',utm_source:'facebook'}};
+  const lead={...makeLead(),senderEmail:'qa-declined@example.com',marketingConsent:false,attribution:{path:'/',fbp:'fb.1.1726800000000.1234',utm_source:'facebook'}};
   assert.equal((await request('/api/leads',lead)).status,201);
   const row=(await pool.query('SELECT * FROM zebra_web_leads WHERE id=$1',[lead.submissionId])).rows[0];
   assert.equal(row.client_ip,null);assert.equal(row.user_agent,null);assert.deepEqual(row.payload.attribution,{path:'/'});
@@ -41,7 +41,7 @@ try {
   assert.equal((await request('/api/admin/verify-code',{challenge,code:'654321'})).status,401);
   const login=await request('/api/admin/verify-code',{challenge,code});assert.equal(login.status,200);const cookie=login.headers.get('set-cookie');assert.match(cookie,/HttpOnly/);assert.match(cookie,/SameSite=Strict/);
   assert.equal((await request('/api/admin/verify-code',{challenge,code})).status,401);
-  const headers={cookie};const exported=await request('/api/admin/export',null,headers);assert.equal(exported.status,200);assert.match(await exported.text(),/"First Name","Last Name","Phone","Email"/);const leads=await request('/api/admin/leads',null,headers);assert.equal(leads.status,200);const id=(await leads.json()).leads.find(l=>l.payload.marketingConsent).id;
+  const headers={cookie};const exported=await request('/api/admin/export',null,headers);assert.equal(exported.status,200);const csv=await exported.text();assert.match(csv,/"First Name","Last Name","Phone","Email"/);assert.ok(!csv.includes("qa-declined@example.com"));assert.match(csv,/"12025550101"/);const leads=await request('/api/admin/leads',null,headers);assert.equal(leads.status,200);const id=(await leads.json()).leads.find(l=>l.payload.marketingConsent).id;
   const update={id,status:'qualified',reason:'QA confirmed model and timing'};
   assert.equal((await request('/api/admin/status',update,headers)).status,200);assert.equal((await request('/api/admin/status',update,headers)).status,200);
   assert.equal((await pool.query("SELECT count(*)::int AS n FROM zebra_lead_outbox WHERE lead_id=$1 AND event_name='QualifiedLead'",[id])).rows[0].n,1);

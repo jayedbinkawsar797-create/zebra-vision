@@ -24,7 +24,7 @@ Open `/leads`, request a sign-in code in the configured business mailbox, and re
 - Browser and server lead events share one event ID for deduplication. Reloading `/thank-you` does not generate a Lead.
 - Status saved in the dashboard is not proof Meta received it. Inspect delivery status.
 
-Conversion events do not create customer cards in Meta Leads Center or synchronize status changes made inside Meta back to this dashboard. For contact review in Meta, use Export website leads and Meta Leads Center > Add leads > Upload leads. Export columns match Meta's downloaded CSV template; review names and field mapping before import. Website status is preserved in Notes, not silently used to overwrite Meta stages. A native two-way CRM integration is not included.
+Conversion events do not create customer cards in Meta Leads Center or synchronize status changes made inside Meta back to this dashboard. For contact review in Meta, use Export leads for Meta and Meta Leads Center > Add leads > Upload leads. Only consented sales inquiries are exported for Meta. Phone numbers use normalized digits for import. Export columns match Meta's downloaded CSV template; review names and field mapping before import. Website status is preserved in Notes, not silently used to overwrite Meta stages. A native two-way CRM integration is not included.
 
 ## Verification
 
