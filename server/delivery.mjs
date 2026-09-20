@@ -2,9 +2,9 @@ import { pool } from './db.mjs';
 import { leadEmail, metaEvent } from './lead-core.mjs';
 
 export const mailConfig = () => ({
-  key: process.env.BREVO_API_KEY || process.env.VITE_BREVO_API_KEY,
-  sender: process.env.BREVO_SENDER_EMAIL || process.env.VITE_BREVO_SENDER_EMAIL || 'notifications@zebragolfcart.com',
-  recipient: process.env.BREVO_RECIPIENT_EMAIL || process.env.VITE_BREVO_RECIPIENT_EMAIL || 'info@zebragolfcart.com',
+  key: process.env.BREVO_API_KEY,
+  sender: process.env.BREVO_SENDER_EMAIL || 'notifications@zebragolfcart.com',
+  recipient: process.env.BREVO_RECIPIENT_EMAIL || 'info@zebragolfcart.com',
 });
 
 export async function sendMail(subject, htmlContent, replyTo) {
