@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+import LeadConsent from "@/components/LeadConsent";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -9,7 +11,7 @@ const TestDriveForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", date: "", location: "florida" });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     const locationName = form.location === "florida" ? "Florida" : form.location === "arizona" ? "Arizona" : "Atlanta";
@@ -24,15 +26,11 @@ const TestDriveForm = () => {
           preferredDate: form.date,
           location: `${locationName} Showroom`,
         },
-      });
-    } catch (err) {
-      console.warn("Lead dispatch handled:", err);
-    } finally {
-      setIsSubmitting(false);
+      }, e.currentTarget);
       navigate("/thank-you", {
         state: {
           type: "testdrive",
-          title: "Test Drive Scheduled!",
+          title: "Test Drive Request Received!",
           message: `Thank you, ${form.name}! We have received your test drive request for our ${locationName} Showroom on ${form.date}. Our team will contact you shortly to confirm your slot.`,
           details: {
             showroom: `${locationName} Showroom`,
@@ -43,6 +41,10 @@ const TestDriveForm = () => {
           },
         },
       });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Your request was not saved. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -142,7 +144,8 @@ const TestDriveForm = () => {
                   </select>
                 </div>
               </div>
-              <button
+              <LeadConsent />
+                <button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full py-4 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest glow-red hover:scale-[1.01] transition-all duration-300 flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:pointer-events-none"
@@ -157,7 +160,8 @@ const TestDriveForm = () => {
                   </>
                 )}
               </button>
-            </form>
+
+              </form>
           </motion.div>
         </div>
       </div>

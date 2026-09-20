@@ -1,10 +1,8 @@
-import { useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2, Phone, Mail, MapPin, ArrowRight, Sparkles, Clock, ShieldCheck, Home } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { trackPixelEvent } from "@/lib/metaPixel";
 
 interface ThankYouState {
   title?: string;
@@ -17,24 +15,12 @@ const ThankYou = () => {
   const location = useLocation();
   const state = (location.state as ThankYouState) || {};
 
-  const title = state.title || "Thank You! Your Request Has Been Received";
+  const title = state.title || "Contact Zebra Golf Cart";
   const message =
     state.message ||
-    "We have received your details. A Zebra concierge specialist will review your request and reach out to you within 24 hours.";
+    "Submit a quote request or contact our team to discuss your cart.";
 
-  useEffect(() => {
-    trackPixelEvent("Lead", {
-      content_name: state.title || "Lead Submission",
-      content_category: state.type || "general",
-      ...state.details,
-    });
-    if (state.type === "demo" || state.type === "testdrive") {
-      trackPixelEvent("Schedule", {
-        content_name: state.title || "Test Drive Booking",
-        ...state.details,
-      });
-    }
-  }, [state.type, state.title, state.details]);
+
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -59,7 +45,7 @@ const ThankYou = () => {
             </div>
 
             <p className="text-primary text-xs font-bold uppercase tracking-[0.35em] mb-3 flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4" /> Request Confirmed
+              <Sparkles className="w-4 h-4" /> {state.type ? "Request received" : "We are here to help"}
             </p>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-foreground mb-4">
               {title.includes("!") ? (
@@ -188,18 +174,14 @@ const ThankYou = () => {
           {/* Showroom Locations */}
           <div className="text-center mb-12">
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center justify-center gap-2 mb-3">
-              <MapPin className="w-4 h-4 text-primary" /> Authorized Showroom Hubs
+              <MapPin className="w-4 h-4 text-primary" /> Visit by appointment
             </p>
             <div className="inline-flex flex-wrap items-center justify-center gap-3">
               <span className="px-4 py-1.5 rounded-full bg-card/40 border border-border/30 text-xs font-bold text-foreground">
-                Florida Showroom
+                Plantation, Florida
               </span>
-              <span className="px-4 py-1.5 rounded-full bg-card/40 border border-border/30 text-xs font-bold text-foreground">
-                Arizona Showroom
-              </span>
-              <span className="px-4 py-1.5 rounded-full bg-card/40 border border-border/30 text-xs font-bold text-foreground">
-                Atlanta Showroom
-              </span>
+
+
             </div>
           </div>
 

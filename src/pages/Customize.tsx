@@ -66,7 +66,7 @@ const CustomizePage = () => {
   const navigate = useNavigate();
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [selectedSeat, setSelectedSeat] = useState(seatOptions[0]);
-  const [selectedConfig, setSelectedConfig] = useState(configOptions[2]);
+  const [selectedConfig, setSelectedConfig] = useState(() => configOptions.find(m => m.label.toLowerCase().replace(/ /g, "-") === new URLSearchParams(window.location.search).get("model")) || configOptions[0]);
   const [selectedTire, setSelectedTire] = useState(tireOptions[1]);
   const [selectedRim, setSelectedRim] = useState(rimOptions[0]);
   const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);

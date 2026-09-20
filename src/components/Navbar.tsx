@@ -8,7 +8,7 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "Customize", href: "/customize" },
   { label: "Book a Demo", href: "/book-demo" },
-  { label: "Dealer Application", href: "/dealer" },
+  { label: "Become a Dealer", href: "/dealer" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -33,7 +33,7 @@ const Navbar = () => {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? "bg-background/90 backdrop-blur-xl border-b border-border/20 shadow-lg" : "bg-transparent"
+        scrolled ? "bg-background/90 backdrop-blur-xl border-b border-border/20 shadow-lg" : "bg-background/90"
       }`}
     >
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
@@ -70,7 +70,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile toggle */}
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden text-foreground">
+        <button aria-label={mobileOpen ? "Close menu" : "Open menu"} aria-expanded={mobileOpen} onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden text-foreground">
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>

@@ -1,3 +1,4 @@
+import LeadConsent from "@/components/LeadConsent";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -27,31 +28,10 @@ const subjects = [
   { id: "other", label: "Other" },
 ];
 
-const locations = [
-  {
-    name: "Florida Showroom",
-    address: "South Florida",
-    phone: "(954) 820-4220",
-    email: "info@zebragolfcart.com",
-    hours: "Mon–Sat: 9AM – 6PM",
-  },
-  {
-    name: "Arizona Showroom",
-    address: "Phoenix Metro Area",
-    phone: "(954) 820-4220",
-    email: "info@zebragolfcart.com",
-    hours: "Mon–Sat: 9AM – 6PM",
-  },
-  {
-    name: "Atlanta Showroom",
-    address: "Atlanta Metro Area",
-    phone: "(954) 820-4220",
-    email: "info@zebragolfcart.com",
-    hours: "Mon–Sat: 9AM – 6PM",
-  },
-];
+const locations = [{name: "Plantation, Florida", address: "Contact us to confirm your visit", phone: "(954) 820-4220", email: "info@zebragolfcart.com", hours: "Visits by appointment"}];
 
 const Contact = () => {
+  const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -68,7 +48,7 @@ const Contact = () => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result = contactSchema.safeParse(form);
     if (!result.success) {
@@ -94,11 +74,7 @@ const Contact = () => {
           subject: subjectLabel,
           message: form.message,
         },
-      });
-    } catch (err) {
-      console.warn("Lead dispatch handled:", err);
-    } finally {
-      setIsSubmitting(false);
+      }, e.currentTarget);
       navigate("/thank-you", {
         state: {
           type: "contact",
@@ -112,6 +88,10 @@ const Contact = () => {
           },
         },
       });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Your request was not saved. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -234,6 +214,8 @@ const Contact = () => {
                   )}
                 </div>
 
+
+                <LeadConsent />
                 <button
                   type="submit"
                   disabled={isSubmitting}

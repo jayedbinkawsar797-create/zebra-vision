@@ -13,16 +13,16 @@ const StickyReservationBar = () => (
       <div className="hidden sm:flex items-center gap-3">
         <Shield className="w-4 h-4 text-primary" />
         <span className="text-sm text-muted-foreground">
-          <span className="text-foreground font-bold">5-Year Warranty</span> · Street Legal · Solar Powered
+          <span className="text-foreground font-bold">Ready for your Zebra?</span> · Talk to our team
         </span>
       </div>
       <div className="flex items-center gap-4 w-full sm:w-auto">
-        <Link
-          to="/customize"
+        <a
+          href="#get-quote"
           className="flex-1 sm:flex-none text-center px-8 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform"
         >
-          Build Your Cart
-        </Link>
+          Get Pricing & Availability
+        </a>
       </div>
     </div>
   </motion.div>
