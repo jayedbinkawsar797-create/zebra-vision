@@ -2,9 +2,9 @@ import { pool } from './db.mjs';
 import { leadEmail, metaEvent } from './lead-core.mjs';
 
 export const mailConfig = () => ({
-  key: process.env.BREVO_API_KEY || process.env.VITE_BREVO_API_KEY,
-  sender: process.env.BREVO_SENDER_EMAIL || process.env.VITE_BREVO_SENDER_EMAIL || 'notifications@zebragolfcart.com',
-  recipient: process.env.BREVO_RECIPIENT_EMAIL || process.env.VITE_BREVO_RECIPIENT_EMAIL || 'info@zebragolfcart.com',
+  key: process.env.BREVO_API_KEY?.trim(),
+  sender: process.env.BREVO_SENDER_EMAIL?.trim() || 'notifications@zebragolfcart.com',
+  recipient: process.env.BREVO_RECIPIENT_EMAIL?.trim() || 'info@zebragolfcart.com',
 });
 
 export async function sendMail(subject, htmlContent, replyTo) {
@@ -15,7 +15,13 @@ export async function sendMail(subject, htmlContent, replyTo) {
     headers: { 'api-key': c.key, 'content-type': 'application/json', accept: 'application/json' },
     body: JSON.stringify({ sender: { name: 'Zebra Golf Cart', email: c.sender }, to: [{email: c.recipient}], subject, htmlContent, ...(replyTo ? {replyTo} : {}) }),
   });
-  if (!response.ok) throw new Error(`email_http_${response.status}`);
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    // Never log provider messages: they can contain addresses or credentials.
+    const allowedCodes = new Set(['unauthorized', 'permission_denied', 'invalid_parameter', 'missing_parameter', 'not_enough_credits', 'account_under_validation', 'not_acceptable', 'duplicate_parameter', 'out_of_range', 'method_not_allowed']);
+    const code = allowedCodes.has(result.code) ? `_${result.code}` : '';
+    throw new Error(`email_http_${response.status}${code}`);
+  }
 }
 
 export async function sendMeta(lead, job) {
@@ -55,9 +61,11 @@ export async function deliverPending() {
         }
         await connection.query("UPDATE zebra_lead_outbox SET state='sent',last_error=NULL WHERE id=$1", [job.id]);
       } catch (error) {
+        const safeError = /^(?:email_http_\d{3}(?:_[a-z_]+)?|email_not_configured|meta_http_\d{3}|meta_not_configured|meta_invalid_config|meta_event_expired)$/.test(error.message) ? error.message : 'delivery_unavailable';
+        console.error('Lead delivery failed', {kind: job.kind, code: safeError, attempt: job.attempts + 1});
         const terminal = job.attempts >= 19 || error.message === 'meta_event_expired';
         const delay = Math.min(3600, 60 * 2 ** Math.min(job.attempts, 6));
-        await connection.query("UPDATE zebra_lead_outbox SET attempts=attempts+1, last_error=$2, state=$3, next_attempt=now()+$4*interval '1 second' WHERE id=$1", [job.id, /^(meta|email)_/.test(error.message) ? error.message : 'delivery_unavailable', terminal ? 'failed' : 'pending', delay]);
+        await connection.query("UPDATE zebra_lead_outbox SET attempts=attempts+1, last_error=$2, state=$3, next_attempt=now()+$4*interval '1 second' WHERE id=$1", [job.id, safeError, terminal ? 'failed' : 'pending', delay]);
       }
     }
   } catch { console.error('Lead delivery queue temporarily unavailable'); }
