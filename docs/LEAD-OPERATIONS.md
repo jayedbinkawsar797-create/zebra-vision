@@ -11,7 +11,7 @@ Use Railway's private runtime variables, never Vite-prefixed build variables:
 - `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_RECIPIENT_EMAIL`: a rotated Brevo key, verified sender, and the business mailbox that receives inquiries and staff sign-in codes.
 - `META_ACCESS_TOKEN`, `META_DATASET_ID`, `META_GRAPH_VERSION`: dataset-scoped Conversions API credentials.
 
-The previously exposed Brevo key must be revoked at Brevo. Removing a key from source does not invalidate it or remove it from Git history. The server temporarily accepts the old runtime variable names so notifications can continue during rotation; no email credential is included in the frontend build. Remove obsolete Railway variables after rotation. Do not restart paid traffic until rotation and a real notification delivery check pass.
+The previously exposed Brevo key must be revoked at Brevo. Removing a key from source does not invalidate it or remove it from Git history. The server requires `BREVO_API_KEY` and never falls back to the obsolete `VITE_BREVO_API_KEY`. No email credential is included in the frontend build. Remove obsolete Railway variables after rotation. Delivery failures log only a service name, a sanitized error code, and an attempt count, never credentials or customer details. Do not restart paid traffic until rotation and a real notification delivery check pass.
 
 ## Lead review and Meta
 
