@@ -54,7 +54,11 @@ const Quote = () => {
       return;
     }
     try {
-      setConfig(JSON.parse(stored));
+      const storedConfig: ConfigData = JSON.parse(stored);
+      // Correct configurations saved before the battery voltage label was updated.
+      storedConfig.model.battery = storedConfig.model.battery.replace(/^51\.2V\b/, "52.1V");
+      sessionStorage.setItem("zebra-config", JSON.stringify(storedConfig));
+      setConfig(storedConfig);
     } catch {
       navigate("/customize");
     }

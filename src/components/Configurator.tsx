@@ -23,9 +23,9 @@ const seatOptions = [
 ];
 
 const configOptions = [
-  { id: "4seat", label: "Breeze 4L", sub: "4-Seater", price: "$14,999", battery: "51.2V 150Ah", motor: "5KW" },
-  { id: "4seat-pro", label: "Breeze 4L Pro", sub: "4-Seater Pro", price: "$15,999", battery: "51.2V 230Ah", motor: "5KW" },
-  { id: "6seat", label: "Terrain 6", sub: "6-Seater", price: "$17,999", battery: "51.2V 230Ah", motor: "5KW" },
+  { id: "4seat", label: "Breeze 4L", sub: "4-Seater", price: "$14,999", battery: "52.1V 150Ah", motor: "5KW" },
+  { id: "4seat-pro", label: "Breeze 4L Pro", sub: "4-Seater Pro", price: "$15,999", battery: "52.1V 230Ah", motor: "5KW" },
+  { id: "6seat", label: "Terrain 6", sub: "6-Seater", price: "$17,999", battery: "52.1V 230Ah", motor: "5KW" },
   { id: "6seat-pro", label: "Terrain 6 Pro", sub: "6-Seater Pro", price: "$19,999", battery: "73.6V 205Ah", motor: "7.5KW" },
 ];
 

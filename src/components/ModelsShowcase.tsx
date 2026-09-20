@@ -10,14 +10,14 @@ const models = [
     name: "Breeze 4L",
     seats: "4-Seater",
     price: "From $14,999",
-    specs: ["51.2V 150Ah Lithium", "5KW AC Motor", "80+ Mile Range"],
+    specs: ["52.1V 150Ah Lithium", "5KW AC Motor", "80+ Mile Range"],
   },
   {
     image: cartAngle2,
     name: "Terrain 6",
     seats: "6-Seater",
     price: "From $17,999",
-    specs: ["51.2V 230Ah Lithium", "5KW AC Motor", "100+ Mile Range"],
+    specs: ["52.1V 230Ah Lithium", "5KW AC Motor", "100+ Mile Range"],
     featured: true,
   },
   {
