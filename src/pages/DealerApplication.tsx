@@ -187,8 +187,8 @@ const DealerApplication = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Business Name *</label>
-                    <input type="text" value={form.businessName} onChange={(e) => updateField("businessName", e.target.value)} className={getInputClass("businessName")} placeholder="ABC Motors" />
+                    <label htmlFor="dealer-businessName" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Business Name *</label>
+                    <input id="dealer-businessName" type="text" value={form.businessName} onChange={(e) => updateField("businessName", e.target.value)} className={getInputClass("businessName")} placeholder="ABC Motors" />
                     {errors.businessName && (
                       <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" /> {errors.businessName}
@@ -196,8 +196,8 @@ const DealerApplication = () => {
                     )}
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Contact Name *</label>
-                    <input type="text" value={form.contactName} onChange={(e) => updateField("contactName", e.target.value)} className={getInputClass("contactName")} placeholder="John Doe" />
+                    <label htmlFor="dealer-contactName" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Contact Name *</label>
+                    <input id="dealer-contactName" type="text" value={form.contactName} onChange={(e) => updateField("contactName", e.target.value)} className={getInputClass("contactName")} placeholder="John Doe" />
                     {errors.contactName && (
                       <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" /> {errors.contactName}
@@ -208,8 +208,8 @@ const DealerApplication = () => {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Email *</label>
-                    <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email")} placeholder="john@business.com" />
+                    <label htmlFor="dealer-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Email *</label>
+                    <input id="dealer-email" type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} className={getInputClass("email")} placeholder="john@business.com" />
                     {errors.email && (
                       <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" /> {errors.email}
@@ -217,8 +217,8 @@ const DealerApplication = () => {
                     )}
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Phone *</label>
-                    <input type="tel" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone")} placeholder="(555) 123-4567" />
+                    <label htmlFor="dealer-phone" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Phone *</label>
+                    <input id="dealer-phone" type="tel" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} className={getInputClass("phone")} placeholder="(555) 123-4567" />
                     {errors.phone && (
                       <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" /> {errors.phone}
@@ -228,14 +228,14 @@ const DealerApplication = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Website (Optional)</label>
-                  <input type="url" value={form.website} onChange={(e) => updateField("website", e.target.value)} className={getInputClass("website")} placeholder="https://yourdealership.com" />
+                  <label htmlFor="dealer-website" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Website (Optional)</label>
+                  <input id="dealer-website" type="url" value={form.website} onChange={(e) => updateField("website", e.target.value)} className={getInputClass("website")} placeholder="https://yourdealership.com" />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">City *</label>
-                    <input type="text" value={form.city} onChange={(e) => updateField("city", e.target.value)} className={getInputClass("city")} placeholder="Miami" />
+                    <label htmlFor="dealer-city" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">City *</label>
+                    <input id="dealer-city" type="text" value={form.city} onChange={(e) => updateField("city", e.target.value)} className={getInputClass("city")} placeholder="Miami" />
                     {errors.city && (
                       <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" /> {errors.city}
@@ -243,8 +243,8 @@ const DealerApplication = () => {
                     )}
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">State *</label>
-                    <input type="text" value={form.state} onChange={(e) => updateField("state", e.target.value)} className={getInputClass("state")} placeholder="FL" />
+                    <label htmlFor="dealer-state" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">State *</label>
+                    <input id="dealer-state" type="text" value={form.state} onChange={(e) => updateField("state", e.target.value)} className={getInputClass("state")} placeholder="FL" />
                     {errors.state && (
                       <p className="text-xs text-primary font-semibold mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" /> {errors.state}
@@ -255,15 +255,15 @@ const DealerApplication = () => {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Business Type</label>
-                    <select value={form.businessType} onChange={(e) => updateField("businessType", e.target.value)}
+                    <label htmlFor="dealer-businessType" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Business Type</label>
+                    <select id="dealer-businessType" value={form.businessType} onChange={(e) => updateField("businessType", e.target.value)}
                       className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm">
                       {businessTypes.map((b) => <option key={b.id} value={b.id}>{b.label}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Years in Business</label>
-                    <select value={form.yearsInBusiness} onChange={(e) => updateField("yearsInBusiness", e.target.value)}
+                    <label htmlFor="dealer-yearsInBusiness" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Years in Business</label>
+                    <select id="dealer-yearsInBusiness" value={form.yearsInBusiness} onChange={(e) => updateField("yearsInBusiness", e.target.value)}
                       className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm">
                       {yearOptions.map((y) => <option key={y.id} value={y.id}>{y.label}</option>)}
                     </select>
@@ -271,8 +271,8 @@ const DealerApplication = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Additional Information (Optional)</label>
-                  <textarea value={form.message} onChange={(e) => updateField("message", e.target.value)} rows={4}
+                  <label htmlFor="dealer-message" className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Additional Information (Optional)</label>
+                  <textarea id="dealer-message" value={form.message} onChange={(e) => updateField("message", e.target.value)} rows={4}
                     className="w-full px-5 py-3.5 rounded-xl border border-border/30 bg-card/30 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all text-sm resize-none" placeholder="Tell us about your dealership, current inventory, volume..." />
                 </div>
 
