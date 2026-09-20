@@ -25,12 +25,12 @@ export const leadSchema = z.object({
 }).strict();
 
 export const hash = value => createHash('sha256').update(String(value)).digest('hex');
+export const normalizedPhone = value => { const digits = value.replace(/\D/g, ''); return digits.length === 10 ? `1${digits}` : digits; };
 export const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const eventForType = type => type === 'dealer' ? 'SubmitApplication' : type === 'contact' ? 'Contact' : 'Lead';
 export function metaEvent(lead, eventName = eventForType(lead.payload.type), eventId = lead.id, at = lead.created_at) {
   const p = lead.payload;
-  const digits = p.senderPhone.replace(/\D/g, '');
-  const phone = digits.length === 10 ? `1${digits}` : digits;
+  const phone = normalizedPhone(p.senderPhone);
   const event = {
     event_name: eventName,
     event_time: Math.floor(new Date(at).getTime() / 1000),
