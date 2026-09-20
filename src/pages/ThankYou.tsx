@@ -103,9 +103,9 @@ const ThankYou = () => {
                 <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-black text-sm flex items-center justify-center mb-4">
                   1
                 </div>
-                <h4 className="font-display font-bold text-base text-foreground mb-1">Lead Assigned</h4>
+                <h4 className="font-display font-bold text-base text-foreground mb-1">Review Your Request</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Your specifications have been routed directly to our specialist team for rapid review.
+                  Our team reviews your preferences and the information you provide.
                 </p>
               </div>
 
@@ -115,7 +115,7 @@ const ThankYou = () => {
                 </div>
                 <h4 className="font-display font-bold text-base text-foreground mb-1">Direct Consultation</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  A dedicated concierge will contact you by phone or email to answer questions or confirm appointments.
+                  Our team can answer questions, prepare a quote, and confirm appointment details.
                 </p>
               </div>
 
@@ -123,9 +123,9 @@ const ThankYou = () => {
                 <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-black text-sm flex items-center justify-center mb-4">
                   3
                 </div>
-                <h4 className="font-display font-bold text-base text-foreground mb-1">Delivery & Drive</h4>
+                <h4 className="font-display font-bold text-base text-foreground mb-1">Confirm Next Steps</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Experience your luxury street-legal golf cart with nationwide door-to-door delivery.
+                  We will confirm availability, delivery options, and any next steps for your request.
                 </p>
               </div>
             </div>
