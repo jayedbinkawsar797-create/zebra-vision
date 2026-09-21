@@ -78,6 +78,22 @@ export const server = http.createServer(async (req,res) => {
             if(payload.marketingConsent) await cx.query("INSERT INTO zebra_lead_outbox(id,lead_id,kind,event_name) VALUES($1,$2,'meta',$3)",[payload.submissionId,payload.submissionId,eventForType(payload.type)]);
           }
           await cx.query('COMMIT');
+          // Trigger AI Assistant Webhook silently
+          try {
+            const aiPayload = {
+              first_name: payload.senderName.split(' ')[0],
+              phone_number: payload.senderPhone,
+              model_interest: payload.data?.model || 'Zebra Golf Cart'
+            };
+            fetch('https://zebra-ai-assistant-production.up.railway.app/api/new-lead', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(aiPayload)
+            }).catch(e => console.error("AI trigger fetch failed:", e));
+          } catch(aiErr) {
+            console.error("AI trigger block failed:", aiErr);
+          }
+
         } catch(error) {await cx.query('ROLLBACK'); throw error;} finally {cx.release();}
         json(res,201,{success:true,leadId:payload.submissionId,eventId:payload.submissionId,eventName:eventForType(payload.type)});
         void deliverPending(); return;
