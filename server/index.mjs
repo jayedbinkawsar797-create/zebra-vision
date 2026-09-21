@@ -78,20 +78,30 @@ export const server = http.createServer(async (req,res) => {
             if(payload.marketingConsent) await cx.query("INSERT INTO zebra_lead_outbox(id,lead_id,kind,event_name) VALUES($1,$2,'meta',$3)",[payload.submissionId,payload.submissionId,eventForType(payload.type)]);
           }
           await cx.query('COMMIT');
-          // Trigger AI Assistant Webhook silently
+          // Trigger Quo SMS Directly!
           try {
-            const aiPayload = {
-              first_name: payload.senderName.split(' ')[0],
-              phone_number: payload.senderPhone,
-              model_interest: payload.data?.model || 'Zebra Golf Cart'
-            };
-            fetch('https://zebra-ai-assistant-production.up.railway.app/api/new-lead', {
+            const first = payload.senderName.split(' ')[0];
+            let cleanPhone = payload.senderPhone.replace(/\D/g, '');
+            if (cleanPhone.length === 10) cleanPhone = '+1' + cleanPhone;
+            else if (cleanPhone.length === 11 && cleanPhone.startsWith('1')) cleanPhone = '+' + cleanPhone;
+            else cleanPhone = payload.senderPhone;
+
+            const textMsg = `Hi ${first}! This is Alex from Zebra Golf Cart. We received your request and will reach out shortly! Let me know if you have any questions in the meantime.`;
+
+            fetch('https://api.openphone.com/v1/messages', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(aiPayload)
-            }).catch(e => console.error("AI trigger fetch failed:", e));
-          } catch(aiErr) {
-            console.error("AI trigger block failed:", aiErr);
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer a847a692a12286c9387186e6648b7cf5b0726074faaf62fdde46e42b23008982'
+              },
+              body: JSON.stringify({
+                from: "+19548204220",
+                to: [cleanPhone],
+                content: textMsg
+              })
+            }).catch(e => console.error("Quo text failed:", e));
+          } catch(e) {
+            console.error(e);
           }
 
         } catch(error) {await cx.query('ROLLBACK'); throw error;} finally {cx.release();}
